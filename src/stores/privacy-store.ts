@@ -106,3 +106,11 @@ export async function requestWidgetOrigin(origin: string) {
   const permissions = extensionApi()?.permissions
   return permissions ? permissions.request({ origins: [`${origin}/*`] }) : true
 }
+
+/** Check an already-granted widget origin without opening a permission prompt. */
+export async function hasWidgetOrigin(origin: string) {
+  const normalized = remoteUrl(origin)
+  if (!normalized || new URL(normalized).origin !== origin) return false
+  const permissions = extensionApi()?.permissions
+  return permissions ? permissions.contains({ origins: [`${origin}/*`] }) : true
+}

@@ -2,7 +2,7 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .utility-editor-field {
@@ -10,7 +10,7 @@
   min-width: 0;
   flex-direction: column;
   gap: 7px;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.4;
   color: var(--foreground);
 }
@@ -21,11 +21,11 @@
 
 .utility-editor-switch-row {
   display: flex;
-  min-height: 32px;
+  min-height: 28px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .utility-editor-switch-row > label {
@@ -59,4 +59,155 @@
   margin: 0;
   font-size: 12px;
   color: var(--destructive);
+}
+
+.utility-editor-search {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+}
+
+.utility-editor-search > input {
+  min-width: 0;
+  flex: 1;
+}
+
+.utility-editor-results {
+  display: flex;
+  max-height: 220px;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.utility-editor-result {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.utility-editor-result:hover,
+.utility-editor-result:focus-visible {
+  background: var(--muted);
+  outline: none;
+}
+
+.utility-editor-result > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--muted-foreground);
+}
+
+.utility-editor-result > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.utility-editor-result strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.utility-editor-result small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.utility-editor-selected {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--muted) 65%, transparent);
+  font-size: 12px;
+  color: var(--foreground);
+}
+
+.utility-editor-selected > svg {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+}
+
+.utility-editor-selected > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.utility-editor-segmented {
+  width: 100%;
+}
+
+.utility-editor-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.utility-editor-status[data-ready] {
+  color: var(--foreground);
+}
+
+.utility-editor-status-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--muted-foreground);
+}
+
+.utility-editor-status[data-ready] .utility-editor-status-dot {
+  background: #2f9e5b;
+}
+
+.utility-editor-coords {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.utility-editor-coords > label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+.utility-editor-coords input {
+  font-size: 14px;
+}
+
+.utility-editor-selected > small {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
 }

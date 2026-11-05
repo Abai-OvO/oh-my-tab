@@ -15,7 +15,13 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';"
   },
-  "permissions": ["activeTab", "search", "storage", "unlimitedStorage"],
+  "permissions": [
+    "activeTab",
+    "geolocation",
+    "search",
+    "storage",
+    "unlimitedStorage"
+  ],
   "action": {
     "default_title": "__MSG_actionTitle__",
     "default_popup": "popup.html",

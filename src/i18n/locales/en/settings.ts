@@ -56,6 +56,7 @@ export default {
     clearSelected: "Clear selected",
     categories: {
       icons: "Website icons",
+      weather: "Weather cache",
       unusedImages: "Unused images",
       background: "Current background image",
       bookmarks: "Bookmarks, components and layout",

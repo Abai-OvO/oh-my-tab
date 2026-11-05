@@ -24,7 +24,7 @@ import {
   validPhoto,
   validTimeZone,
 } from "@/lib/widgets/model"
-import { parseWeather, widgetRequestUrl } from "@/lib/widgets/network"
+import { remoteSourceKey } from "@/lib/widgets/network"
 
 const shared = {
   id: "widget",
@@ -76,12 +76,14 @@ describe("utility widgets", () => {
     expect(catalogComponentKinds).not.toContain("github-repo")
     expect(catalogComponentKinds).toContain("pomodoro")
     expect(catalogComponentKinds).toContain("countdown")
+    expect(catalogComponentKinds).toContain("weather")
     for (const kind of utilityWidgetKinds.filter(
       (kind) =>
         kind !== "pomodoro" &&
         kind !== "countdown" &&
         kind !== "workday" &&
-        kind !== "clock"
+        kind !== "clock" &&
+        kind !== "weather"
     ))
       expect(catalogComponentKinds).not.toContain(kind)
     expect(
@@ -100,7 +102,11 @@ describe("utility widgets", () => {
         height: option.height,
       })
       expect(option.width).toBeGreaterThanOrEqual(
-        kind === "countdown" || kind === "clock" ? 2 : 4
+        kind === "countdown" || kind === "clock"
+          ? 2
+          : kind === "weather"
+            ? 1
+            : 4
       )
     }
   })
@@ -276,16 +282,16 @@ describe("utility widgets", () => {
     ).toMatchObject({ phase: "focus", remainingMs: 600_000, endsAt: null })
   })
 
-  test("current timer phases survive ZIP backup", async () => {
-    const focus = timer()
+  test("legacy and current timer state survive ZIP backup", async () => {
+    const legacy = timer()
     const rest = completePomodoro(
       togglePomodoro({ ...timer(), breakMinutes: 5, loop: true }, 0),
       1_500_000
     )
-    const config = { items: [focus, rest] }
+    const config = { items: [legacy, rest] }
     const restored = await decodeBackup(await encodeBackup(config))
     expect(restored.config).toEqual(config)
-    expect(validGridItem(focus)).toBe(true)
+    expect(validGridItem(legacy)).toBe(true)
     expect(validGridItem(rest)).toBe(true)
     for (const fields of [
       { breakMinutes: -1 },
@@ -295,7 +301,7 @@ describe("utility widgets", () => {
       { phase: "invalid" },
       { phase: "break", breakMinutes: 0 },
     ]) {
-      expect(validGridItem({ ...focus, ...fields })).toBe(false)
+      expect(validGridItem({ ...legacy, ...fields })).toBe(false)
     }
   })
 
@@ -316,30 +322,17 @@ describe("utility widgets", () => {
     )
     expect(validPhoto("data:image/svg+xml;base64,PHN2Zz4=")).toBe(false)
 
-    const weatherUrl = new URL(
-      widgetRequestUrl({
-        id: "w",
-        name: "Weather",
-        color: "#123456",
-        size: "large",
-        kind: "weather",
-        latitude: 35.68,
-        longitude: 139.69,
-        locationName: "Tokyo",
-        unit: "celsius",
-      })
-    )
-    expect(weatherUrl.origin).toBe("https://api.open-meteo.com")
-    expect(weatherUrl.searchParams.get("forecast_days")).toBe("3")
-    expect(
-      parseWeather({
-        current: { temperature_2m: 22, weather_code: 0 },
-        daily: {
-          time: ["2026-09-24"],
-          temperature_2m_max: [25],
-          temperature_2m_min: [18],
-        },
-      }).forecast
-    ).toEqual([{ date: "2026-09-24", high: 25, low: 18 }])
+    const weather = {
+      id: "w",
+      name: "Weather",
+      color: "#123456",
+      size: "large" as const,
+      kind: "weather" as const,
+      latitude: 35.68,
+      longitude: 139.69,
+      locationName: "Tokyo",
+      unit: "celsius" as const,
+    }
+    expect(remoteSourceKey(weather)).toBe("35.68,139.69")
   })
 })

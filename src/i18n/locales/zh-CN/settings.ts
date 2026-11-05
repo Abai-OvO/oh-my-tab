@@ -55,6 +55,7 @@ export default {
     clearSelected: "清除所选",
     categories: {
       icons: "网站图标",
+      weather: "天气缓存",
       unusedImages: "闲置图片",
       background: "当前背景图片",
       bookmarks: "书签、组件与布局",

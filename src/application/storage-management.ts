@@ -30,7 +30,11 @@ export async function clearStorageCategories(categories: StorageCategory[]) {
         // A newly uploaded asset may not have been linked to settings yet.
         if (createdAt && createdAt > Date.now() - 86400000) continue
         remove.push(key)
-      } else if (category === "icons" || category === "background")
+      } else if (
+        category === "icons" ||
+        category === "weather" ||
+        category === "background"
+      )
         remove.push(key)
     }
     if (selected.has("preferences") || selected.has("background")) {

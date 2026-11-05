@@ -251,6 +251,9 @@ export function validUtilityWidget(item: UtilityWidgetItem): boolean {
       return (
         text(item.locationName, 40) &&
         ["celsius", "fahrenheit"].includes(item.unit) &&
+        (item.provider === undefined ||
+          item.provider === "open-meteo" ||
+          item.provider === "qweather") &&
         ((item.latitude === null && item.longitude === null) ||
           (typeof item.latitude === "number" &&
             Number.isFinite(item.latitude) &&
@@ -326,6 +329,7 @@ export function createUtilityWidget(
       return {
         ...shared,
         kind,
+        provider: "open-meteo",
         locationName: "",
         latitude: null,
         longitude: null,

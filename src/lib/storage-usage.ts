@@ -1,5 +1,6 @@
 export type StorageCategory =
   | "icons"
+  | "weather"
   | "unused-images"
   | "background"
   | "bookmarks"
@@ -13,6 +14,11 @@ export const storageCategories: {
   clearable: boolean
 }[] = [
   { id: "icons", labelKey: "settings.cache.categories.icons", clearable: true },
+  {
+    id: "weather",
+    labelKey: "settings.cache.categories.weather",
+    clearable: true,
+  },
   {
     id: "unused-images",
     labelKey: "settings.cache.categories.unusedImages",
@@ -58,6 +64,7 @@ export function storedState(value: unknown): Record<string, unknown> {
   }
 }
 export function categoryFor(key: string, background: unknown): StorageCategory {
+  if (key.startsWith("cache:weather")) return "weather"
   if (key.startsWith("cache:")) return "icons"
   if (key.startsWith("asset:"))
     return key === background ? "background" : "unused-images"

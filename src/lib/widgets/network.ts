@@ -1,59 +1,31 @@
 import type { RemoteWidgetItem } from "@/lib/grid/utility-types"
-import { dateOrdinal, remoteUrl, safeLink } from "./model"
+import { remoteUrl, safeLink } from "./model"
+import { fetchQWeatherWeather, QWeatherError } from "./qweather"
+import { fetchOpenMeteoWeather } from "./open-meteo"
+import { WidgetNetworkError, type WidgetNetworkErrorCode } from "./errors"
+import type { WeatherConfig } from "./weather-provider"
+import type { WeatherData } from "./weather-types"
 
-export type WeatherData = {
-  kind: "weather"
-  temperature: number
-  code: number | null
-  forecast: { date: string; high: number; low: number }[]
-}
+export { WidgetNetworkError, type WidgetNetworkErrorCode } from "./errors"
+export type {
+  WeatherAirQuality,
+  WeatherData,
+  WeatherDay,
+  WeatherDetails,
+  WeatherHour,
+  WeatherPrecipitation,
+  WeatherWind,
+} from "./weather-types"
 export type FeedData = {
   kind: "rss"
   entries: { title: string; url: string }[]
 }
 export type RemoteWidgetData = WeatherData | FeedData
-export type WidgetNetworkErrorCode =
-  | "notConfigured"
-  | "permissionDenied"
-  | "requestFailed"
-  | "rateLimited"
-  | "responseTooLarge"
-  | "invalidResponse"
-
-export class WidgetNetworkError extends Error {
-  readonly code: WidgetNetworkErrorCode
-
-  constructor(code: WidgetNetworkErrorCode) {
-    super(code)
-    this.code = code
-    this.name = "WidgetNetworkError"
-  }
-}
 
 export function widgetRequestUrl(item: RemoteWidgetItem): string {
   switch (item.kind) {
-    case "weather": {
-      if (
-        item.latitude === null ||
-        item.longitude === null ||
-        !Number.isFinite(item.latitude) ||
-        Math.abs(item.latitude) > 90 ||
-        !Number.isFinite(item.longitude) ||
-        Math.abs(item.longitude) > 180
-      )
-        throw new WidgetNetworkError("notConfigured")
-      const url = new URL("https://api.open-meteo.com/v1/forecast")
-      url.search = new URLSearchParams({
-        latitude: String(item.latitude),
-        longitude: String(item.longitude),
-        current: "temperature_2m,weather_code",
-        daily: "temperature_2m_max,temperature_2m_min",
-        forecast_days: "3",
-        temperature_unit: item.unit,
-        timezone: "auto",
-      }).toString()
-      return url.href
-    }
+    case "weather":
+      throw new WidgetNetworkError("notConfigured")
     case "rss": {
       const url = remoteUrl(item.feedUrl)
       if (!url) throw new WidgetNetworkError("notConfigured")
@@ -63,6 +35,8 @@ export function widgetRequestUrl(item: RemoteWidgetItem): string {
 }
 
 export function remoteSourceKey(item: RemoteWidgetItem) {
+  if (item.kind === "weather")
+    return `${item.latitude ?? ""},${item.longitude ?? ""}`
   try {
     return widgetRequestUrl(item)
   } catch {
@@ -72,22 +46,34 @@ export function remoteSourceKey(item: RemoteWidgetItem) {
 
 export const WIDGET_RESPONSE_LIMIT = 1024 * 1024
 
-export async function fetchWidgetText(url: string, signal: AbortSignal) {
-  const response = await fetch(url, {
+async function requestWidget(
+  url: string,
+  signal: AbortSignal,
+  init: RequestInit
+) {
+  return fetch(url, {
+    ...init,
     signal: AbortSignal.any([signal, AbortSignal.timeout(10_000)]),
     credentials: "omit",
     referrerPolicy: "no-referrer",
     redirect: "error",
     cache: "no-store",
-    headers: {
-      Accept:
-        "application/json, application/atom+xml, application/rss+xml, text/xml",
-    },
   })
-  if (!response.ok)
+}
+
+async function readWidgetResponse(response: Response) {
+  if (!response.ok) {
+    const status = response.status
+    await response.body?.cancel().catch(() => {})
     throw new WidgetNetworkError(
-      [403, 429].includes(response.status) ? "rateLimited" : "requestFailed"
+      status === 403 || status === 429
+        ? "rateLimited"
+        : status === 402
+          ? "quotaExceeded"
+          : "requestFailed",
+      status
     )
+  }
   if (Number(response.headers.get("content-length")) > WIDGET_RESPONSE_LIMIT) {
     await response.body?.cancel()
     throw new WidgetNetworkError("responseTooLarge")
@@ -115,56 +101,52 @@ export async function fetchWidgetText(url: string, signal: AbortSignal) {
   }
 }
 
-function record(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    throw new WidgetNetworkError("invalidResponse")
-  return value as Record<string, unknown>
+export async function fetchWidgetText(url: string, signal: AbortSignal) {
+  const response = await requestWidget(url, signal, {
+    headers: {
+      Accept:
+        "application/json, application/atom+xml, application/rss+xml, text/xml",
+    },
+  })
+  return readWidgetResponse(response)
 }
 
-function number(value: unknown): number {
-  if (typeof value !== "number" || !Number.isFinite(value))
-    throw new WidgetNetworkError("invalidResponse")
-  return value
+/** JSON POST with the same timeout, redirect, credential and size policy. */
+export async function postWidgetJson(
+  url: string,
+  body: unknown,
+  signal: AbortSignal,
+  headers: Record<string, string> = {}
+) {
+  const response = await requestWidget(url, signal, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    body: JSON.stringify(body),
+  })
+  return readWidgetResponse(response)
 }
 
-function count(value: unknown) {
-  const result = number(value)
-  if (!Number.isSafeInteger(result) || result < 0)
-    throw new WidgetNetworkError("invalidResponse")
-  return result
-}
-
-export function parseWeather(value: unknown): WeatherData {
-  const root = record(value)
-  const current = record(root.current)
-  const daily = record(root.daily)
-  const dates = daily.time
-  const highs = daily.temperature_2m_max
-  const lows = daily.temperature_2m_min
-  if (
-    !Array.isArray(dates) ||
-    !Array.isArray(highs) ||
-    !Array.isArray(lows) ||
-    dates.length < 1 ||
-    dates.length > 3 ||
-    dates.length !== highs.length ||
-    dates.length !== lows.length
-  )
-    throw new WidgetNetworkError("invalidResponse")
-  return {
-    kind: "weather",
-    temperature: number(current.temperature_2m),
-    code: current.weather_code == null ? null : count(current.weather_code),
-    forecast: dates.map((date: unknown, index: number) => {
-      if (typeof date !== "string" || dateOrdinal(date) === null)
-        throw new WidgetNetworkError("invalidResponse")
-      return {
-        date,
-        high: number(highs[index]),
-        low: number(lows[index]),
-      }
-    }),
-  }
+/** Form POST for LibreTranslate and similar endpoints. */
+export async function postWidgetForm(
+  url: string,
+  body: URLSearchParams,
+  signal: AbortSignal,
+  headers: Record<string, string> = {}
+) {
+  const response = await requestWidget(url, signal, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+      ...headers,
+    },
+    body: body.toString(),
+  })
+  return readWidgetResponse(response)
 }
 
 function children(element: Element, name: string): Element[] {
@@ -205,18 +187,69 @@ export function parseFeed(xml: string, source: string): FeedData {
   return { kind: "rss", entries }
 }
 
+export function mapQWeatherError(error: QWeatherError): WidgetNetworkErrorCode {
+  switch (error.code) {
+    case "notConfigured":
+      return "notConfigured"
+    case "authFailed":
+      return "authFailed"
+    case "quotaExceeded":
+      return "quotaExceeded"
+    case "rateLimited":
+      return "rateLimited"
+    case "invalidResponse":
+      return "invalidResponse"
+    case "requestFailed":
+      return "requestFailed"
+  }
+}
+
 export async function readRemoteWidget(
   item: RemoteWidgetItem,
-  signal: AbortSignal
+  signal: AbortSignal,
+  config: WeatherConfig | null,
+  language: string
 ) {
-  const url = widgetRequestUrl(item)
-  const body = await fetchWidgetText(url, signal)
-  if (item.kind === "rss") return parseFeed(body, url)
-  let value: unknown
-  try {
-    value = JSON.parse(body)
-  } catch {
-    throw new WidgetNetworkError("invalidResponse")
+  if (item.kind === "rss") {
+    const url = widgetRequestUrl(item)
+    return parseFeed(await fetchWidgetText(url, signal), url)
   }
-  return parseWeather(value)
+  if (
+    item.latitude === null ||
+    item.longitude === null ||
+    !Number.isFinite(item.latitude) ||
+    Math.abs(item.latitude) > 90 ||
+    !Number.isFinite(item.longitude) ||
+    Math.abs(item.longitude) > 180
+  )
+    throw new WidgetNetworkError("notConfigured")
+  if (!config) throw new WidgetNetworkError("notConfigured")
+  if (config.provider === "open-meteo") {
+    try {
+      return await fetchOpenMeteoWeather(
+        item.latitude,
+        item.longitude,
+        item.unit,
+        language,
+        signal
+      )
+    } catch (error) {
+      if (error instanceof WidgetNetworkError) throw error
+      throw new WidgetNetworkError("requestFailed")
+    }
+  }
+  try {
+    return await fetchQWeatherWeather(
+      item.latitude,
+      item.longitude,
+      item.unit,
+      config,
+      language,
+      signal
+    )
+  } catch (error) {
+    if (error instanceof QWeatherError)
+      throw new WidgetNetworkError(mapQWeatherError(error))
+    throw new WidgetNetworkError("requestFailed")
+  }
 }

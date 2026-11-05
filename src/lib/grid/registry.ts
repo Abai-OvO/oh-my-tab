@@ -492,6 +492,7 @@ export const componentRegistry = defineComponents({
 export const catalogComponentKinds = [
   "button-slot",
   "clock",
+  "weather",
   "button",
   "dot-canvas",
   "todo",

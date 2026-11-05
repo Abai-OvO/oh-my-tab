@@ -1,5 +1,5 @@
-/* Widget chrome borrows folder/calendar surface, color and radius; no extra
-   card, shadow or border inside the tile. */
+/* Widget chrome inherits the same surface, color and radius as the existing
+   folder/calendar cards. No second card, shadow or border inside the tile. */
 .utility-surface {
   --utility-ink: color-mix(
     in oklab,
@@ -608,13 +608,49 @@
 .utility-unloaded {
   display: flex;
   flex: 1;
+  width: 100%;
   min-height: 0;
   flex-direction: column;
   gap: 12px;
   align-items: center;
   justify-content: center;
+  padding: 4px;
+  border: 0;
+  background: transparent;
   color: var(--utility-secondary);
+  font: inherit;
   font-size: 12px;
+}
+button.utility-unloaded:enabled {
+  cursor: pointer;
+}
+button.utility-unloaded:enabled:hover {
+  color: var(--utility-ink);
+}
+button.utility-unloaded:disabled {
+  cursor: default;
+}
+.utility-weather .utility-body {
+  gap: 4px;
+  padding: 10px 14px;
+}
+.utility-weather .utility-footer {
+  min-height: 18px;
+  gap: 0;
+  justify-content: flex-end;
+}
+.utility-weather-open {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  border-radius: 10px;
+  outline: none;
+  cursor: pointer;
+}
+.utility-weather-open:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
 }
 .utility-weather-reading {
   display: flex;
@@ -624,15 +660,24 @@
   flex: 1;
   min-height: 0;
 }
-.utility-weather-reading > div {
+.utility-weather-primary {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+}
+.utility-weather-location {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--utility-secondary);
 }
 .utility-temperature {
   display: flex;
-  font-size: 76px;
+  font-size: clamp(28px, 30cqw, 76px);
   font-weight: 450;
   letter-spacing: -0.075em;
   line-height: 0.95;
@@ -640,80 +685,353 @@
   color: var(--utility-ink);
 }
 .utility-temperature > span {
-  font-size: 0.7em;
   margin-left: 3px;
+  font-size: 0.7em;
   font-weight: 350;
 }
 .utility-weather-condition {
-  font-size: 12px;
-  color: var(--utility-secondary);
-}
-.utility-weather-glyph {
-  flex-shrink: 0;
-  width: 64px;
-  height: 64px;
-  color: var(--utility-ink);
-}
-.utility-forecast {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid var(--utility-line);
-}
-.utility-forecast > div {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 7px;
-}
-.utility-forecast time {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 11px;
   color: var(--utility-secondary);
 }
-.utility-forecast > div > span {
+.utility-weather-glyph {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  color: var(--utility-ink);
+}
+.utility-weather-summary {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.utility-weather-now {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+.utility-weather-now .utility-temperature {
+  font-size: 52px;
+}
+.utility-weather-now-side {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.utility-weather-now-sky {
+  display: flex;
+  min-width: 0;
+  align-items: center;
   gap: 6px;
-  font-size: 14px;
+}
+.utility-weather-now-side .utility-weather-glyph {
+  width: 42px;
+  height: 42px;
+}
+.utility-weather-range {
+  font-size: 10px;
   font-variant-numeric: tabular-nums;
+  color: var(--utility-secondary);
+  white-space: nowrap;
 }
-.utility-forecast strong {
-  font-weight: 500;
+.utility-weather-days {
+  display: grid;
+  /* A short forecast may return fewer than six days; auto-fit spreads
+     whatever days arrive across the full width instead of leaving empty
+     columns. */
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  column-gap: 2px;
+  margin-top: auto;
+  padding-top: 5px;
+  border-top: 1px solid var(--utility-line);
 }
-.utility-forecast > div > span > span {
-  font-size: 12px;
+.utility-weather-day {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.utility-weather-day-label {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
   color: var(--utility-secondary);
 }
-.utility-weather[data-size="medium"] .utility-body {
-  gap: 3px;
-  padding: 9px 16px;
+.utility-weather-day-glyph {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  color: var(--utility-ink);
 }
-.utility-weather[data-size="medium"] .utility-header {
-  height: 20px;
-  min-height: 20px;
+.utility-weather-day-temps {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  color: var(--utility-secondary);
+  white-space: nowrap;
 }
-.utility-weather[data-size="medium"] .utility-temperature {
-  font-size: 43px;
+.utility-weather-days-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: auto;
+  padding-top: 4px;
+  border-top: 1px solid var(--utility-line);
 }
-.utility-weather[data-size="medium"] .utility-weather-reading > div {
+.utility-weather-days-stacked .utility-weather-day {
   flex-direction: row;
-  align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 0;
+  border-top: 1px solid var(--utility-line);
 }
-.utility-weather[data-size="medium"] .utility-weather-condition {
-  max-width: 14ch;
+.utility-weather-days-stacked .utility-weather-day:first-child {
+  border-top: 0;
+}
+.utility-weather-days-stacked .utility-weather-day-label,
+.utility-weather-days-stacked .utility-weather-day-temps {
+  font-size: 10px;
+}
+.utility-weather-days-stacked .utility-weather-day-glyph {
+  width: 18px;
+  height: 18px;
+}
+.utility-weather[data-size="medium"] .utility-body {
+  padding: 8px 12px;
+  gap: 4px;
+}
+.utility-weather[data-size="medium"] .utility-weather-summary {
+  align-items: center;
+}
+.utility-weather[data-size="medium"] .utility-weather-now .utility-temperature {
+  font-size: 40px;
+}
+.utility-weather[data-size="medium"] .utility-weather-now-side {
+  gap: 2px;
+}
+.utility-weather[data-size="medium"]
+  .utility-weather-now-side
+  .utility-weather-glyph {
+  width: 28px;
+  height: 28px;
+}
+.utility-weather[data-size="medium"] .utility-weather-range {
+  font-size: 10px;
+}
+.utility-weather[data-size="medium"] .utility-weather-days {
+  padding-top: 4px;
+}
+.utility-weather[data-size="medium"] .utility-weather-day-label,
+.utility-weather[data-size="medium"] .utility-weather-day-temps {
+  font-size: 10px;
+}
+.utility-weather[data-size="medium"] .utility-weather-day-glyph {
+  width: 16px;
+  height: 16px;
+}
+.utility-weather[data-size="large"] .utility-body {
+  padding: 16px 18px;
+  gap: 8px;
+}
+.utility-weather[data-size="large"] .utility-weather-now .utility-temperature {
+  font-size: 72px;
+}
+.utility-weather[data-size="large"] .utility-weather-now-side {
+  gap: 2px;
+}
+.utility-weather[data-size="large"]
+  .utility-weather-now-side
+  .utility-weather-glyph {
+  width: 60px;
+  height: 60px;
+}
+.utility-weather[data-size="large"] .utility-weather-range {
   font-size: 11px;
 }
-.utility-weather[data-size="medium"] .utility-weather-glyph {
-  width: 34px;
-  height: 34px;
+.utility-weather[data-size="large"] .utility-weather-days {
+  padding-top: 10px;
 }
-.utility-weather[data-size="medium"] .utility-footer {
-  min-height: 24px;
+.utility-weather[data-size="large"] .utility-weather-day {
+  gap: 3px;
+}
+.utility-weather[data-size="large"] .utility-weather-day-label,
+.utility-weather[data-size="large"] .utility-weather-day-temps {
+  font-size: 10px;
+}
+.utility-weather[data-size="large"] .utility-weather-day-glyph {
+  width: 22px;
+  height: 22px;
+}
+.utility-weather[data-size="tall"] .utility-body {
+  padding: 10px 14px;
+  gap: 6px;
+}
+.utility-weather[data-size="tall"] .utility-weather-now .utility-temperature {
+  font-size: 52px;
+}
+/* A 135px-wide column cannot fit the horizontal summary row, so stack it:
+   location and temperature on top, condition and glyph sharing one row. The
+   day rows below already carry each day's low~high, so the range is dropped. */
+.utility-weather[data-size="tall"] .utility-weather-summary {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.utility-weather[data-size="tall"] .utility-weather-now-side {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.utility-weather[data-size="tall"] .utility-weather-range {
+  display: none;
+}
+.utility-weather[data-size="tall"]
+  .utility-weather-now-side
+  .utility-weather-glyph {
+  width: 42px;
+  height: 42px;
+}
+.utility-weather[data-size="square"] .utility-body {
+  padding: 10px 12px;
+}
+.utility-weather[data-size="square"] .utility-weather-primary {
+  gap: 2px;
+}
+.utility-weather[data-size="square"] .utility-temperature {
+  font-size: 42px;
+}
+.utility-weather[data-size="square"] .utility-weather-condition {
+  font-size: 11px;
+}
+.utility-weather[data-size="square"] .utility-weather-glyph {
+  width: 36px;
+  height: 36px;
+}
+.utility-weather[data-size="square"] .utility-weather-now-sky {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+.utility-weather[data-size="square"] .utility-weather-range {
+  font-size: 11px;
+}
+.utility-weather[data-size="small"] .utility-body {
+  gap: 0;
+  padding: 4px 8px;
+}
+.utility-weather[data-size="small"] .utility-weather-reading {
+  gap: 4px;
+}
+.utility-weather[data-size="small"] .utility-weather-primary {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+.utility-weather[data-size="small"] .utility-temperature {
+  font-size: 30px;
+}
+.utility-weather[data-size="small"] .utility-weather-condition {
+  max-width: 4ch;
+  font-size: 9px;
+  line-height: 1.15;
+}
+.utility-weather[data-size="small"] .utility-weather-location {
+  display: none;
+}
+.utility-weather[data-size="small"] .utility-weather-glyph {
+  width: 24px;
+  height: 24px;
+}
+.utility-weather[data-size="small"] .utility-footer {
+  min-height: 16px;
+}
+.utility-weather[data-size="small"] .utility-unloaded {
+  flex-direction: row;
+  gap: 6px;
+  font-size: 10px;
+}
+.utility-weather[data-size="small"] .utility-empty {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+}
+.utility-weather[data-size="small"] .utility-empty-icon {
+  margin: 0;
+}
+.utility-weather[data-size="small"] .utility-empty-title {
+  font-size: 12px;
+}
+.utility-weather[data-size="small"] .utility-empty-hint,
+.utility-weather[data-size="small"] .utility-empty-arrow {
+  display: none;
+}
+.utility-weather[data-size="narrow"] .utility-body {
+  gap: 2px;
+  padding: 8px 3px;
+}
+.utility-weather[data-size="narrow"] .utility-weather-reading {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.utility-weather[data-size="narrow"] .utility-weather-primary {
+  align-items: center;
+  gap: 2px;
+}
+.utility-weather[data-size="narrow"] .utility-weather-location {
+  max-width: 100%;
+  font-size: 9px;
+}
+.utility-weather[data-size="narrow"] .utility-temperature {
+  font-size: 26px;
+}
+.utility-weather[data-size="narrow"] .utility-weather-condition {
+  font-size: 9px;
+}
+.utility-weather[data-size="narrow"] .utility-weather-glyph {
+  width: 24px;
+  height: 24px;
+}
+.utility-weather[data-size="narrow"] .utility-footer {
+  min-height: 16px;
+}
+.utility-weather[data-size="narrow"] .utility-footer .utility-action {
+  width: 24px;
+  height: 24px;
+}
+.utility-weather[data-size="narrow"] .utility-unloaded {
+  gap: 6px;
+  font-size: 10px;
+}
+.utility-weather[data-size="narrow"] .utility-empty {
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  text-align: center;
+}
+.utility-weather[data-size="narrow"] .utility-empty-icon {
+  margin: 0;
+}
+.utility-weather[data-size="narrow"] .utility-empty-title {
+  font-size: 10px;
+  line-height: 1.3;
+}
+.utility-weather[data-size="narrow"] .utility-empty-hint,
+.utility-weather[data-size="narrow"] .utility-empty-arrow {
+  display: none;
 }
 .utility-weather[data-size="medium"] .utility-empty {
   flex-direction: row;
@@ -790,6 +1108,13 @@
   font-size: 11px;
   line-height: 1.5;
   color: var(--destructive);
+}
+button.utility-error {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
 }
 /* Hide optional chrome only on devices that really support hover. Controls
    reappear for keyboard focus and remain visible for touch and forced colors. */

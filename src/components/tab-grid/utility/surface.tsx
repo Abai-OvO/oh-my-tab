@@ -16,6 +16,18 @@ export type WidgetProps<T extends UtilityWidgetItem = UtilityWidgetItem> = {
   onOpen: () => void
 }
 
+/**
+ * Controls normally swallow pointer presses so their own click/selection wins.
+ * Full-tile empty and error actions mark themselves with data-drag-through so
+ * the tile can still be dragged; the grid item discards the click that follows
+ * a completed drag.
+ */
+function stopsTileDrag(event: { target: EventTarget | null }) {
+  if (!(event.target instanceof Element)) return false
+  const control = event.target.closest("button, input, textarea, select, a")
+  return Boolean(control && !control.closest("[data-drag-through]"))
+}
+
 export function WidgetAction({
   label,
   children,
@@ -67,18 +79,10 @@ export function WidgetSurface({
       className={cn("utility-surface", className)}
       style={{ "--utility-accent": item.color } as CSSProperties}
       onMouseDown={(event) => {
-        if (
-          event.target instanceof Element &&
-          event.target.closest("button, input, textarea, select, a")
-        )
-          event.stopPropagation()
+        if (stopsTileDrag(event)) event.stopPropagation()
       }}
       onPointerDown={(event) => {
-        if (
-          event.target instanceof Element &&
-          event.target.closest("button, input, textarea, select, a")
-        )
-          event.stopPropagation()
+        if (stopsTileDrag(event)) event.stopPropagation()
       }}
     >
       {background && (
@@ -143,6 +147,7 @@ export function WidgetEmpty({
   ) : (
     <button
       type="button"
+      data-drag-through
       className="utility-empty utility-focus"
       onClick={onOpen}
     >

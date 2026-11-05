@@ -12,7 +12,14 @@ export const utilityWidgetKinds = [
 
 export type UtilityWidgetKind = (typeof utilityWidgetKinds)[number]
 export type UtilityWidgetSize =
-  "small" | "medium" | "large" | "tall" | "wide" | "wide-tall"
+  | "small"
+  | "medium"
+  | "large"
+  | "tall"
+  | "narrow"
+  | "square"
+  | "wide"
+  | "wide-tall"
 
 export type CountdownEvent = { title: string; date: string }
 export type WorldClockZone = { id: string; label: string; timeZone: string }

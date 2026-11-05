@@ -4,11 +4,15 @@ const grid = {
     medium: "Medium",
     large: "Large",
     tall: "Tall",
+    narrow: "Narrow",
+    square: "Square",
     wide: "Wide",
     wideTall: "Wide & tall",
     week: "Week",
     day: "Day",
     month: "Month",
+    icon: "Icon",
+    compact: "Compact",
   },
   component: {
     buttonSlot: {

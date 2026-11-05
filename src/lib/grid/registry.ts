@@ -10,6 +10,7 @@ export const GRID_UNIT = 1
 export const GRID_OCCUPANCY = {
   "1x1": { width: 1, height: 1 },
   "2x1": { width: 2, height: 1 },
+  "1x2": { width: 1, height: 2 },
   "2x2": { width: 2, height: 2 },
   "2x4": { width: 2, height: 4 },
   "4x1": { width: 4, height: 1 },
@@ -46,11 +47,15 @@ export type SizeRole =
   | "medium"
   | "large"
   | "tall"
+  | "narrow"
+  | "square"
   | "wide"
   | "wideTall"
   | "week"
   | "day"
   | "month"
+  | "icon"
+  | "compact"
 
 export type ComponentSizeDefinition = {
   value: GridItemSize
@@ -183,6 +188,8 @@ export const componentRegistry = defineComponents({
     defaultColor: "#6c8bd4",
     defaultSize: "small",
     sizes: [
+      gridSize("icon", "1x1", "icon"),
+      gridSize("compact", "2x1", "compact"),
       gridSize("small", "4x1", "small"),
       gridSize("medium", "4x2", "medium"),
       gridSize("square-small", "1x1"),
@@ -441,7 +448,14 @@ export const componentRegistry = defineComponents({
   weather: utilityDefinition(
     "weather",
     "large",
-    [gridSize("medium", "4x2", "medium"), gridSize("large", "4x4", "large")],
+    [
+      gridSize("small", "2x1", "small"),
+      gridSize("narrow", "1x2", "narrow"),
+      gridSize("square", "2x2", "square"),
+      gridSize("medium", "4x2", "medium"),
+      gridSize("tall", "2x4", "tall"),
+      gridSize("large", "4x4", "large"),
+    ],
     "common",
     "#5ba9d1"
   ),

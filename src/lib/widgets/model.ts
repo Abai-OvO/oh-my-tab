@@ -1,4 +1,9 @@
 import { validWorkdaySchedule } from "./workday"
+import {
+  defaultTargetLanguage,
+  isTranslateLanguage,
+} from "@/lib/translate/languages"
+import { isTranslateProviderId } from "@/lib/translate/types"
 import type {
   PomodoroItem,
   UtilityWidgetItem,
@@ -270,6 +275,14 @@ export function validUtilityWidget(item: UtilityWidgetItem): boolean {
       )
     case "rss":
       return item.feedUrl === "" || remoteUrl(item.feedUrl) !== null
+    case "translate":
+      return (
+        (item.provider === undefined || isTranslateProviderId(item.provider)) &&
+        (item.sourceLang === "auto" || isTranslateLanguage(item.sourceLang)) &&
+        isTranslateLanguage(item.targetLang) &&
+        (item.autoTranslate === undefined ||
+          typeof item.autoTranslate === "boolean")
+      )
     case "world-clock":
       return (
         typeof item.hour12 === "boolean" &&
@@ -339,6 +352,15 @@ export function createUtilityWidget(
       return { ...shared, kind, image: "", caption: "", fit: "cover" }
     case "rss":
       return { ...shared, kind, feedUrl: "" }
+    case "translate":
+      return {
+        ...shared,
+        kind,
+        provider: "chrome",
+        sourceLang: "auto",
+        targetLang: defaultTargetLanguage(),
+        autoTranslate: false,
+      }
     case "world-clock":
       return {
         ...shared,

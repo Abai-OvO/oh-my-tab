@@ -11,7 +11,9 @@ import "./utility/editor.css"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -50,6 +52,18 @@ import { requestWidgetOrigin } from "@/stores/privacy-store"
 import { useTabGridStore } from "@/stores/tab-grid-store"
 import { updateUtilityWidget } from "@/stores/widget-actions"
 import { useWeatherStore } from "@/stores/weather-store"
+import { chromeAutoSupported } from "@/lib/translate/chrome-builtin"
+import {
+  commonTranslateLanguages,
+  fallbackSourceLanguage,
+  isTranslateLanguage,
+  languageName,
+  sortedTranslateLanguages,
+} from "@/lib/translate/languages"
+import {
+  isTranslateProviderId,
+  type TranslateProviderId,
+} from "@/lib/translate/types"
 import { Crosshair, MagnifyingGlass, MapPin } from "@phosphor-icons/react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
@@ -149,6 +163,9 @@ export default function UtilityWidgetFields({
   const workdayId = useId()
   const clockId = useId()
   const weatherSearchId = useId()
+  const translateProviderFieldId = useId()
+  const translateSourceId = useId()
+  const translateTargetId = useId()
   const apiHost = useWeatherStore((state) => state.apiHost)
   const apiKey = useWeatherStore((state) => state.apiKey)
   const setWeatherConfig = useWeatherStore((state) => state.setConfig)
@@ -195,6 +212,8 @@ export default function UtilityWidgetFields({
     draft.kind === "weather"
       ? resolveWeatherProvider(draft, qweatherConfigured)
       : undefined
+  const translatedLanguages = sortedTranslateLanguages(i18n.language)
+  const commonTranslatedLanguages = new Set<string>(commonTranslateLanguages)
 
   useEffect(
     () => () => {
@@ -1133,6 +1152,165 @@ export default function UtilityWidgetFields({
             <p className="utility-editor-help">{t("widgets.rssPrivacy")}</p>
           </>
         )
+      case "translate": {
+        const provider: TranslateProviderId = draft.provider ?? "chrome"
+        const providerName = t(`grid.translate.providers.${provider}`)
+        return (
+          <>
+            <SettingItem
+              label={t("grid.translate.provider")}
+              htmlFor={translateProviderFieldId}
+            >
+              <Select
+                value={provider}
+                onValueChange={(value) => {
+                  if (!isTranslateProviderId(value)) return
+                  const fallback =
+                    value === "chrome" &&
+                    draft.sourceLang === "auto" &&
+                    !chromeAutoSupported()
+                      ? { sourceLang: fallbackSourceLanguage(draft.targetLang) }
+                      : {}
+                  patch({ provider: value, ...fallback })
+                }}
+              >
+                <SelectTrigger id={translateProviderFieldId} className="w-full">
+                  <SelectValue>{providerName}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="chrome">
+                    {t("grid.translate.providers.chrome")}
+                  </SelectItem>
+                  <SelectItem value="libre">
+                    {t("grid.translate.providers.libre")}
+                  </SelectItem>
+                  <SelectItem value="custom">
+                    {t("grid.translate.providers.custom")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </SettingItem>
+            <SettingItem
+              label={t("grid.translate.sourceLanguage")}
+              htmlFor={translateSourceId}
+            >
+              <Select
+                value={draft.sourceLang}
+                onValueChange={(value) => {
+                  if (value === "auto" || isTranslateLanguage(value))
+                    patch({ sourceLang: value })
+                }}
+              >
+                <SelectTrigger id={translateSourceId} className="w-full">
+                  <SelectValue>
+                    {draft.sourceLang === "auto"
+                      ? t("grid.translate.autoDetect")
+                      : languageName(draft.sourceLang, i18n.language)}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem
+                    value="auto"
+                    disabled={provider === "chrome" && !chromeAutoSupported()}
+                  >
+                    {t("grid.translate.autoDetect")}
+                  </SelectItem>
+                  <SelectGroup>
+                    <SelectLabel>
+                      {t("grid.translate.commonLanguages")}
+                    </SelectLabel>
+                    {commonTranslateLanguages
+                      .filter((language) =>
+                        translatedLanguages.includes(language)
+                      )
+                      .map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {languageName(language, i18n.language)}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>
+                      {t("grid.translate.allLanguages")}
+                    </SelectLabel>
+                    {translatedLanguages
+                      .filter(
+                        (language) => !commonTranslatedLanguages.has(language)
+                      )
+                      .map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {languageName(language, i18n.language)}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </SettingItem>
+            <SettingItem
+              label={t("grid.translate.targetLanguage")}
+              htmlFor={translateTargetId}
+            >
+              <Select
+                value={draft.targetLang}
+                onValueChange={(value) => {
+                  if (isTranslateLanguage(value)) patch({ targetLang: value })
+                }}
+              >
+                <SelectTrigger id={translateTargetId} className="w-full">
+                  <SelectValue>
+                    {languageName(draft.targetLang, i18n.language)}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectGroup>
+                    <SelectLabel>
+                      {t("grid.translate.commonLanguages")}
+                    </SelectLabel>
+                    {commonTranslateLanguages
+                      .filter((language) =>
+                        translatedLanguages.includes(language)
+                      )
+                      .map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {languageName(language, i18n.language)}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>
+                      {t("grid.translate.allLanguages")}
+                    </SelectLabel>
+                    {translatedLanguages
+                      .filter(
+                        (language) => !commonTranslatedLanguages.has(language)
+                      )
+                      .map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {languageName(language, i18n.language)}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </SettingItem>
+            <SwitchField
+              label={t("grid.translate.autoTranslate")}
+              checked={draft.autoTranslate ?? false}
+              onChange={(autoTranslate) => patch({ autoTranslate })}
+            />
+            <p className="utility-editor-help">
+              {provider === "chrome"
+                ? t("grid.translate.autoTranslateHint")
+                : t("grid.translate.autoTranslateNetworkHint", {
+                    provider: providerName,
+                  })}
+            </p>
+            <p className="utility-editor-help">
+              {t("grid.translate.configHint")}
+            </p>
+          </>
+        )
+      }
       case "world-clock":
         return (
           <>

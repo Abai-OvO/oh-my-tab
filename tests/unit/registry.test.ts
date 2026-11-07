@@ -30,6 +30,27 @@ describe("component occupancy registration", () => {
       validGridItem({ ...createCatalogComponent("clock"), size: "large" })
     ).toBe(false)
   })
+  test("weather is addable and offers compact through large layouts", () => {
+    expect(
+      getComponentSizeOptions("weather", "catalog").map(({ width, height }) => [
+        width,
+        height,
+      ])
+    ).toEqual([
+      [2, 1],
+      [1, 2],
+      [2, 2],
+      [4, 2],
+      [2, 4],
+      [4, 4],
+    ])
+    expect(catalogComponentKinds).toContain("weather")
+    expect(componentRegistry.weather.defaultSize).toBe("medium")
+    expect(createCatalogComponent("weather")).toMatchObject({
+      kind: "weather",
+      size: "medium",
+    })
+  })
   test("every size picks a unique occupancy from the shared scale", () => {
     for (const [kind, definition] of Object.entries(componentRegistry)) {
       const occupancies = definition.sizes.map((size) => size.occupancy)
@@ -41,6 +62,8 @@ describe("component occupancy registration", () => {
             height: size.height,
           }
         )
+        // Display text is resolved from `roleKey`, never stored: the label is
+        // the translated role word plus the numeric mark.
         const expected = occupancyMark(size.width, size.height)
         expect(sizeLabel(size, (key) => key)).toBe(
           size.roleKey ? `${size.roleKey} · ${expected}` : expected
@@ -69,15 +92,16 @@ describe("component occupancy registration", () => {
         ])
       )
     ).toEqual({
-      "button-slot": "common",
       button: "common",
       clock: "common",
+      weather: "common",
       "dot-canvas": "dots",
       todo: "productivity",
       calendar: "productivity",
       workday: "productivity",
       pomodoro: "productivity",
       countdown: "productivity",
+      translate: "productivity",
       "search-minimal": "common",
       ecosystem: "fun",
     })
@@ -87,7 +111,9 @@ describe("component occupancy registration", () => {
           kind !== "pomodoro" &&
           kind !== "countdown" &&
           kind !== "workday" &&
-          kind !== "clock"
+          kind !== "clock" &&
+          kind !== "weather" &&
+          kind !== "translate"
       ),
       "bookmark-list",
       "search-full",
@@ -112,10 +138,11 @@ describe("component occupancy registration", () => {
   )
 
   test("search widgets expose the shared editor without changing their saved sizes", () => {
+    expect(componentRegistry["search-minimal"].openAction).toBe("edit")
     expect(componentRegistry["search-minimal"].showNameInEditor).toBe(false)
     expect(
-      getComponentSizeOptions("search-minimal", "resize").map(
-        (size) => size.value
+      getComponentSizeOptions("search-minimal", "editor").map(
+        ({ value }) => value
       )
     ).toEqual(["compact", "medium", "small"])
   })
@@ -147,5 +174,41 @@ describe("component occupancy registration", () => {
         height: 2,
       }
     )
+  })
+
+  test("tabs offer icon and half-width sizes without changing their default", () => {
+    const definition = componentRegistry.tab
+    expect(definition.defaultSize).toBe("small")
+    expect(
+      getComponentSizeOptions("tab", "editor").map(
+        ({ value, width, height }) => [value, width, height]
+      )
+    ).toEqual([
+      ["icon", 1, 1],
+      ["compact", 2, 1],
+      ["small", 4, 1],
+      ["medium", 4, 2],
+    ])
+    expect(
+      getComponentSizeOptions("tab", "editor").map(({ value }) => value)
+    ).toEqual(["icon", "compact", "small", "medium"])
+    expect(getItemGridDimensions({ kind: "tab", size: "icon" })).toEqual({
+      width: 1,
+      height: 1,
+    })
+    expect(getItemGridDimensions({ kind: "tab", size: "compact" })).toEqual({
+      width: 2,
+      height: 1,
+    })
+    const iconTab = {
+      id: "tab-icon",
+      kind: "tab" as const,
+      name: "Icon",
+      url: "https://example.com/",
+      size: "icon" as const,
+      color: "#6c8bd4",
+    }
+    expect(validGridItem(iconTab)).toBe(true)
+    expect(validGridItem({ ...iconTab, size: "compact" })).toBe(true)
   })
 })

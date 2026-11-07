@@ -8,6 +8,7 @@ import {
   PomodoroTile,
   WorldClockTile,
 } from "./utility/time-widgets"
+import TranslateTile from "./translate"
 import type { WidgetProps } from "./utility/surface"
 
 export default function UtilityWidgetTile(props: WidgetProps) {
@@ -25,6 +26,8 @@ export default function UtilityWidgetTile(props: WidgetProps) {
       return <PomodoroTile {...props} item={item} />
     case "photo":
       return <PhotoTile {...props} item={item} />
+    case "translate":
+      return <TranslateTile {...props} item={item} />
     case "world-clock":
       return <WorldClockTile {...props} item={item} />
     case "weather":

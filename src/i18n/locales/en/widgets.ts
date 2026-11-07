@@ -42,6 +42,12 @@ export const utilityComponents = {
     description: "Manually load up to five RSS or Atom headlines.",
     defaultName: "RSS reader",
   },
+  translate: {
+    label: "Translate",
+    description:
+      "A 1×1 translator with on-device Chrome translation, LibreTranslate, or your own endpoint.",
+    defaultName: "Translate",
+  },
   "world-clock": {
     label: "World clocks",
     description: "Compare up to four named time zones.",

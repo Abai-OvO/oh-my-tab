@@ -39,6 +39,12 @@ export const utilityComponents = {
     description: "手动读取最多五条 RSS 或 Atom 标题。",
     defaultName: "RSS 阅读",
   },
+  translate: {
+    label: "翻译",
+    description:
+      "1×1 翻译入口，支持 Chrome 端侧翻译、LibreTranslate 或自定义接口。",
+    defaultName: "翻译",
+  },
   "world-clock": {
     label: "世界时钟",
     description: "对照查看最多四个自定义时区。",

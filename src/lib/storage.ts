@@ -17,6 +17,7 @@ export const DATA_KEYS = [
 export const DEVICE_KEYS = [
   "omt.privacy",
   "omt.weather",
+  "omt.translate",
   "omt.webdav",
   "omt.sync-provider",
   "omt.locale",

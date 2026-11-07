@@ -71,19 +71,22 @@ describe("utility widgets", () => {
       "weather",
       "photo",
       "rss",
+      "translate",
       "world-clock",
     ])
     expect(catalogComponentKinds).not.toContain("github-repo")
     expect(catalogComponentKinds).toContain("pomodoro")
     expect(catalogComponentKinds).toContain("countdown")
     expect(catalogComponentKinds).toContain("weather")
+    expect(catalogComponentKinds).toContain("translate")
     for (const kind of utilityWidgetKinds.filter(
       (kind) =>
         kind !== "pomodoro" &&
         kind !== "countdown" &&
         kind !== "workday" &&
         kind !== "clock" &&
-        kind !== "weather"
+        kind !== "weather" &&
+        kind !== "translate"
     ))
       expect(catalogComponentKinds).not.toContain(kind)
     expect(
@@ -104,7 +107,7 @@ describe("utility widgets", () => {
       expect(option.width).toBeGreaterThanOrEqual(
         kind === "countdown" || kind === "clock"
           ? 2
-          : kind === "weather"
+          : kind === "weather" || kind === "translate"
             ? 1
             : 4
       )

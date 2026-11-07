@@ -1,3 +1,5 @@
+import type { TranslateProviderId } from "@/lib/translate/types"
+
 export const utilityWidgetKinds = [
   "clock",
   "countdown",
@@ -7,6 +9,7 @@ export const utilityWidgetKinds = [
   "weather",
   "photo",
   "rss",
+  "translate",
   "world-clock",
 ] as const
 
@@ -69,10 +72,21 @@ export type UtilityWidgetItem = UtilityBase &
         fit: "cover" | "contain"
       }
     | { kind: "rss"; feedUrl: string }
+    | {
+        kind: "translate"
+        provider?: TranslateProviderId
+        sourceLang: string
+        targetLang: string
+        autoTranslate?: boolean
+      }
     | { kind: "world-clock"; zones: WorldClockZone[]; hour12: boolean }
   )
 
 export type PomodoroItem = Extract<UtilityWidgetItem, { kind: "pomodoro" }>
+export type TranslateWidgetItem = Extract<
+  UtilityWidgetItem,
+  { kind: "translate" }
+>
 export type RemoteWidgetItem = Extract<
   UtilityWidgetItem,
   { kind: "weather" | "rss" }

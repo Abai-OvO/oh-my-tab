@@ -1,6 +1,6 @@
 # lunar-typescript license
 
-The calendar detail popup uses [lunar-typescript](https://github.com/6tail/lunar-typescript) (v1.8.6) for lunar calendar and almanac calculations. The package is bundled into the extension; this notice must be retained in distributions.
+The calendar detail popup uses [lunar-typescript](https://github.com/6tail/lunar-typescript) (v1.8.7) for lunar calendar and almanac calculations. The package is bundled into the extension; this notice must be retained in distributions.
 
 MIT License
 

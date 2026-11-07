@@ -5,6 +5,7 @@ import { useSearchEngineStore } from "@/stores/search-engine-store"
 import { useTabGridStore } from "@/stores/tab-grid-store"
 import { useGardenStore } from "@/stores/garden-store"
 import { useWeatherStore } from "@/stores/weather-store"
+import { useTranslateStore } from "@/stores/translate-store"
 import { useOnboardingStore } from "@/stores/onboarding-store"
 import { usePrivacyStore } from "@/stores/privacy-store"
 import { useLocaleStore } from "@/stores/locale-store"
@@ -23,6 +24,7 @@ const stores = [
   useTabGridStore,
   useGardenStore,
   useWeatherStore,
+  useTranslateStore,
   useOnboardingStore,
   useLocaleStore,
 ]

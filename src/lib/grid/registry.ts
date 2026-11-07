@@ -478,6 +478,27 @@ export const componentRegistry = defineComponents({
     "common",
     "#d49b6c"
   ),
+  translate: {
+    labelKey: "grid.component.translate.label",
+    descriptionKey: "grid.component.translate.description",
+    defaultNameKey: "grid.component.translate.defaultName",
+    defaultColor: "#5b8dd6",
+    defaultSize: "small",
+    sizes: [gridSize("small", "1x1", "icon")],
+    catalogSizes: ["small"],
+    catalogDirectAdd: true,
+    catalogSection: "productivity",
+    detailPreviewWidth: "compact",
+    showNameInEditor: false,
+    tileBorder: true,
+    openAction: "none",
+    actions: {
+      randomColor: true,
+      dynamicEffect: true,
+      groupable: false,
+      expandable: false,
+    },
+  },
   "world-clock": utilityDefinition(
     "world-clock",
     "large",
@@ -500,6 +521,7 @@ export const catalogComponentKinds = [
   "pomodoro",
   "countdown",
   "workday",
+  "translate",
   "search-minimal",
   "ecosystem",
 ] as const satisfies readonly GridItemKind[]

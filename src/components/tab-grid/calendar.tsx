@@ -1,12 +1,20 @@
 import ComponentBackground from "./shared/component-background"
-import { useEffect, useState } from "react"
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react"
 import { CaretLeft, CaretRight } from "@phosphor-icons/react"
 import type { CalendarItem } from "@/lib/grid/types"
 import { useTranslation } from "react-i18next"
 import { weekdayOrder } from "./calendar-utils"
+import CalendarPopup from "./calendar-popup"
 
-// Weeks start on Monday: the index is the column, independent of the locale's
-// own weekend convention.
+// Monday-first week. The index is the column position, so index 0 is always
+// Monday regardless of the resolved language's weekend convention.
 const WEEK_START = 1
 
 function monthTitle(date: Date, locale: string) {
@@ -27,12 +35,51 @@ function dateTitle(date: Date, locale: string) {
 function CalendarContent({
   item,
   preview = false,
+  onOpenDetails,
 }: {
   item: CalendarItem
   preview?: boolean
+  onOpenDetails?: () => void
 }) {
   const { t, i18n } = useTranslation()
   const locale = i18n.language || "zh-CN"
+  const pressStart = useRef<{ x: number; y: number } | null>(null)
+  const openDetails = preview ? undefined : onOpenDetails
+  const detailsTrigger = openDetails
+    ? {
+        role: "button" as const,
+        tabIndex: 0,
+        "aria-label": t("grid.calendar.openDetails"),
+        onPointerDown: (event: ReactPointerEvent<HTMLElement>) => {
+          if (event.button !== 0) {
+            pressStart.current = null
+            return
+          }
+          pressStart.current = { x: event.clientX, y: event.clientY }
+        },
+        onPointerUp: (event: ReactPointerEvent<HTMLElement>) => {
+          const start = pressStart.current
+          pressStart.current = null
+          if (!start || event.button !== 0) return
+          if (Math.hypot(event.clientX - start.x, event.clientY - start.y) < 4)
+            openDetails()
+        },
+        onPointerCancel: () => {
+          pressStart.current = null
+        },
+        onPointerLeave: () => {
+          pressStart.current = null
+        },
+        onClick: (event: ReactMouseEvent<HTMLElement>) =>
+          event.stopPropagation(),
+        onKeyDown: (event: ReactKeyboardEvent<HTMLElement>) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault()
+            openDetails()
+          }
+        },
+      }
+    : {}
   const [today, setToday] = useState(() => new Date())
   const [offset, setOffset] = useState(0)
   useEffect(() => {
@@ -45,6 +92,7 @@ function CalendarContent({
     }
   }, [])
   const month = new Date(today.getFullYear(), today.getMonth() + offset, 1)
+  // Shift so the week starts on Monday: getDay() is 0 for Sunday.
   const start = (month.getDay() - WEEK_START + 7) % 7
   const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate()
   const weekdays = weekdayOrder(locale)
@@ -52,8 +100,10 @@ function CalendarContent({
   if (item.size === "medium")
     return (
       <section
-        aria-label={item.name}
-        className="flex h-full w-full cursor-default flex-col items-center justify-center gap-2 overflow-hidden rounded-[inherit] p-2 text-card-foreground"
+        {...detailsTrigger}
+        className={`flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[inherit] p-2 text-card-foreground ${
+          openDetails ? "cursor-pointer" : "cursor-default"
+        }`}
       >
         <div
           aria-current="date"
@@ -70,8 +120,10 @@ function CalendarContent({
   if (item.size === "small")
     return (
       <section
-        aria-label={item.name}
-        className="grid h-full w-full cursor-default grid-cols-7 items-center gap-0.5 overflow-hidden rounded-[inherit] px-2 py-1 text-card-foreground"
+        {...detailsTrigger}
+        className={`grid h-full w-full grid-cols-7 items-center gap-0.5 overflow-hidden rounded-[inherit] px-2 py-1 text-card-foreground ${
+          openDetails ? "cursor-pointer" : "cursor-default"
+        }`}
       >
         {Array.from({ length: 7 }, (_, index) => {
           const date = new Date(
@@ -161,7 +213,12 @@ function CalendarContent({
           </span>
         ))}
       </div>
-      <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-6 place-items-center text-xs tabular-nums">
+      <div
+        {...detailsTrigger}
+        className={`grid min-h-0 flex-1 grid-cols-7 grid-rows-6 place-items-center text-xs tabular-nums${
+          openDetails ? "cursor-pointer" : ""
+        }`}
+      >
         {Array.from({ length: 42 }, (_, index) => {
           const day = index - start + 1
           const active = offset === 0 && day === today.getDate()
@@ -204,15 +261,25 @@ export default function Calendar({
   item: CalendarItem
   preview?: boolean
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false)
   return (
-    <div className="relative isolate h-full w-full overflow-hidden rounded-[inherit]">
-      <ComponentBackground
-        color={item.color}
-        animated={!preview && !!item.dynamicEffect}
-      />
-      <div className="relative z-10 h-full w-full rounded-[inherit]">
-        <CalendarContent item={item} preview={preview} />
+    <>
+      <div className="relative isolate h-full w-full overflow-hidden rounded-[inherit]">
+        <ComponentBackground
+          color={item.color}
+          animated={!preview && !!item.dynamicEffect}
+        />
+        <div className="relative z-10 h-full w-full rounded-[inherit]">
+          <CalendarContent
+            item={item}
+            preview={preview}
+            onOpenDetails={preview ? undefined : () => setDetailsOpen(true)}
+          />
+        </div>
       </div>
-    </div>
+      {!preview && detailsOpen && (
+        <CalendarPopup onOpenChange={setDetailsOpen} item={item} />
+      )}
+    </>
   )
 }

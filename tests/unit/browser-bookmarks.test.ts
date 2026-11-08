@@ -4,7 +4,11 @@ import {
   readBrowserBookmarks,
   supportsBrowserBookmarks,
 } from "@/lib/browser-bookmarks"
-import { mergeBookmarks, type BookmarkItemFactory } from "@/lib/bookmark-import"
+import {
+  mergeBookmarks,
+  filterBookmarks,
+  type BookmarkItemFactory,
+} from "@/lib/bookmark-import"
 
 const factory: BookmarkItemFactory = {
   createTab: ({ name, url }) => ({
@@ -63,16 +67,32 @@ describe("browser-bookmarks", () => {
           name: "文档",
           url: "https://example.com/docs",
           folder: "书签栏 / 工作",
+          barId: "1",
+          barTitle: "书签栏",
+          folderId: "10",
+          folderPath: ["工作"],
         },
         {
           name: "other.example",
           url: "https://other.example/",
           folder: "书签栏",
+          barId: "1",
+          barTitle: "书签栏",
+          folderId: "1",
+          folderPath: [],
         },
+      ],
+      bars: [
+        { id: "1", title: "书签栏" },
+        { id: "2", title: "其他书签" },
       ],
       invalid: 2,
     })
-    expect(parseBookmarkTree([])).toEqual({ bookmarks: [], invalid: 0 })
+    expect(parseBookmarkTree([])).toEqual({
+      bookmarks: [],
+      bars: [],
+      invalid: 0,
+    })
   })
 
   it("deduplicates repeated imports and merges into existing folders", () => {
@@ -97,6 +117,22 @@ describe("browser-bookmarks", () => {
     expect(folder.kind === "folder" && folder.tabs.length).toBe(2)
     const firstFolder = first.items[0]
     expect(firstFolder.kind === "folder" && firstFolder.tabs.length).toBe(1)
+  })
+
+  it("matches bookmark search against titles, URLs and folders", () => {
+    const bookmarks = [
+      { name: "GitHub", url: "https://github.com/", folder: "开发 / 工具" },
+      {
+        name: "文档",
+        url: "https://example.com/docs",
+        folder: "书签栏 / 工作",
+      },
+    ]
+    expect(filterBookmarks(bookmarks, "")).toBe(bookmarks)
+    expect(filterBookmarks(bookmarks, "github")).toEqual([bookmarks[0]])
+    expect(filterBookmarks(bookmarks, "工作")).toEqual([bookmarks[1]])
+    expect(filterBookmarks(bookmarks, "/docs")).toEqual([bookmarks[1]])
+    expect(filterBookmarks(bookmarks, "missing")).toEqual([])
   })
 
   it("accesses the bookmarks API only after the user grants permission", async () => {

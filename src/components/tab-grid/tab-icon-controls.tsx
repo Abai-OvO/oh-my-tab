@@ -17,6 +17,7 @@ import {
 import { refreshFavicon } from "@/application/favicon-cache"
 import { encodeTabIcon, readTabIcon } from "@/lib/grid/tab-icon"
 import { normalizeTabUrl } from "@/lib/grid/types"
+import { usePrivacyStore } from "@/stores/privacy-store"
 import { toast } from "@/stores/toast-store"
 import TabIconCrop from "./tab-icon-crop"
 import TabTextIconDialog from "./tab-text-icon-dialog"
@@ -69,6 +70,10 @@ export default function TabIconControls({
     const normalized = normalizeTabUrl(url)
     if (!normalized) {
       toast(t("grid.editor.invalidTab"), "error")
+      return
+    }
+    if (!usePrivacyStore.getState().icons) {
+      toast(t("grid.editor.iconDownloadsOff"), "error")
       return
     }
     setBusy(true)

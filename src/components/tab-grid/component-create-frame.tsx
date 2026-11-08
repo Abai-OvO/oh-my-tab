@@ -60,6 +60,7 @@ export default function ComponentCreateFrame({
   cancelLabel,
   onSubmit,
   onClose,
+  overlay,
   children,
 }: {
   open?: boolean
@@ -77,6 +78,7 @@ export default function ComponentCreateFrame({
   previewInteractive?: boolean
   previewOverlap?: boolean
   sizeOptions?: readonly ComponentSizeDefinition[]
+  overlay?: ReactNode
   size?: string
   onSizeChange?: (size: string) => void
   submitLabel?: string
@@ -281,6 +283,11 @@ export default function ComponentCreateFrame({
               </div>
             )}
           </form>
+          {overlay && (
+            <div className="pointer-events-none absolute inset-0 z-20">
+              {overlay}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

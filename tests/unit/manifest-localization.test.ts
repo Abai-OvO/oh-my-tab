@@ -62,6 +62,7 @@ describe("chrome manifest localization", () => {
     })
     expect(manifest.permissions).toEqual([
       "activeTab",
+      "geolocation",
       "search",
       "storage",
       "unlimitedStorage",

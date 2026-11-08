@@ -21,6 +21,7 @@ import TabBackground from "./tab-background"
 import TabUI from "./tab-ui"
 import TabSurface from "./tab-surface"
 import TabIconControls from "./tab-icon-controls"
+import TabQuickAdd from "./tab-quick-add"
 
 export default function TabCreateDialog({
   onClose,
@@ -55,6 +56,16 @@ export default function TabCreateDialog({
     dynamicEffect: false,
   }
 
+  function fillFromQuickAdd(entry: { name: string; url: string }) {
+    setName(entry.name)
+    setUrl(entry.url)
+    setIcon(undefined)
+    requestAnimationFrame(() => {
+      const input = document.getElementById("tab-editor-name")
+      if (input instanceof HTMLInputElement) input.focus()
+    })
+  }
+
   function save() {
     const normalized = normalizeTabUrl(url)
     const resolvedName = name.trim()
@@ -82,6 +93,7 @@ export default function TabCreateDialog({
       description={t("grid.editor.descriptionWithName")}
       width={current.width}
       height={current.height}
+      overlay={<TabQuickAdd onSelect={fillFromQuickAdd} />}
       previewBorder={false}
       previewClip={false}
       preview={

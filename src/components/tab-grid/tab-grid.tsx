@@ -344,10 +344,15 @@ export default function TabGrid({
     intent.kind === "folder" || intent.kind === "reorder"
       ? intent.folderId
       : undefined
-  const folderIntentIndex = intent.kind === "reorder" ? intent.index : undefined
+  const folderIntentIndex =
+    intent.kind === "reorder" || intent.kind === "folder"
+      ? intent.index
+      : undefined
   const intentKind = intent.kind
   const sourceFolderIndex = dragging?.sourceFolderIndex
   const draggedId = dragging?.item.id
+  const draggedTabSize =
+    dragging?.item.kind === "tab" ? dragging.item.size : undefined
   const folderPreviews = useMemo(() => {
     const result = new Map<
       string,
@@ -364,7 +369,8 @@ export default function TabGrid({
           previewFolderTabs(
             item.tabs,
             draggedId,
-            folderIntentIndex ?? item.tabs.length
+            folderIntentIndex ?? item.tabs.length,
+            draggedTabSize
           )
         )
       } else if (
@@ -373,7 +379,12 @@ export default function TabGrid({
       ) {
         result.set(
           item.id,
-          previewFolderTabs(item.tabs, draggedId, sourceFolderIndex)
+          previewFolderTabs(
+            item.tabs,
+            draggedId,
+            sourceFolderIndex,
+            draggedTabSize
+          )
         )
       }
     }
@@ -386,6 +397,7 @@ export default function TabGrid({
     sourceFolderId,
     sourceFolderIndex,
     draggedId,
+    draggedTabSize,
   ])
   const todoIntentId =
     intent.kind === "todo-reorder" ? intent.todoId : undefined
@@ -429,14 +441,16 @@ export default function TabGrid({
         ? previewFolderTabs(
             expandedFolder.tabs,
             dragging?.item.id,
-            intent.index
+            intent.index,
+            draggedTabSize
           )
         : dragging?.sourceFolderId === folderId &&
             dragging.sourceFolderIndex !== undefined
           ? previewFolderTabs(
               expandedFolder.tabs,
               dragging.item.id,
-              dragging.sourceFolderIndex
+              dragging.sourceFolderIndex,
+              draggedTabSize
             )
           : undefined
 

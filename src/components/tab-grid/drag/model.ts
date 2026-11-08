@@ -46,6 +46,7 @@ export type Intent =
   | {
       kind: "folder"
       folderId: string
+      index: number
       ready: boolean
       progress: number
       releaseProgress: number
@@ -87,6 +88,7 @@ export function sameDragIntent(a: Intent, b: Intent): boolean {
       return (
         b.kind === "folder" &&
         a.folderId === b.folderId &&
+        a.index === b.index &&
         a.ready === b.ready &&
         a.progress === b.progress &&
         a.releaseProgress === b.releaseProgress &&
@@ -112,7 +114,8 @@ export function sameDragIntent(a: Intent, b: Intent): boolean {
 export function previewFolderTabs(
   tabs: TabEntry[],
   tabId: string | undefined,
-  index: number
+  index: number,
+  size?: TabEntry["size"]
 ) {
   if (!tabId) return tabs
   const remaining = tabs.filter((tab) => tab.id !== tabId)
@@ -121,6 +124,7 @@ export function previewFolderTabs(
     id: FOLDER_GAP_ID,
     name: "",
     url: "",
+    size,
   })
   return next
 }

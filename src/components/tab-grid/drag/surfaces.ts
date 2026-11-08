@@ -42,37 +42,31 @@ export function folderInsertionIndex(
   )
   if (!surface) return remaining.length
   const viewport = surface.getBoundingClientRect()
-  const rows = Array.from(
-    surface.querySelectorAll<HTMLElement>("[data-stack-row]")
+  // Preview rows pack several tabs per line; dialog rows stay one per line.
+  // Both expose data-tab-id, so a drop can land between tabs on a line.
+  const candidates = Array.from(
+    surface.querySelectorAll<HTMLElement>("[data-tab-id]")
+  ).filter(
+    (tab) =>
+      tab.dataset.tabId !== session.item.id &&
+      tab.dataset.tabId !== FOLDER_GAP_ID &&
+      !tab.inert &&
+      !tab.closest("[inert]")
   )
-  for (const row of rows) {
-    if (
-      !row.dataset.tabId ||
-      row.dataset.tabId === session.item.id ||
-      row.dataset.tabId === FOLDER_GAP_ID ||
-      row.inert
-    )
-      continue
-    const rect = row.getBoundingClientRect()
+  for (const tab of candidates) {
+    const rect = tab.getBoundingClientRect()
     if (rect.bottom <= viewport.top || rect.top >= viewport.bottom) continue
     if (
-      surface.dataset.folderSurface === "dialog" && window.innerWidth >= 1024
-        ? point.y < rect.top ||
-          (point.y <= rect.bottom && point.x < rect.left + rect.width / 2)
-        : point.y < rect.top + rect.height / 2
+      point.y < rect.top ||
+      (point.y <= rect.bottom && point.x < rect.left + rect.width / 2)
     )
       return Math.max(
         0,
-        remaining.findIndex((tab) => tab.id === row.dataset.tabId)
+        remaining.findIndex((entry) => entry.id === tab.dataset.tabId)
       )
   }
-  const visible = rows.filter(
-    (row) =>
-      !row.inert &&
-      row.dataset.tabId &&
-      row.dataset.tabId !== session.item.id &&
-      row.dataset.tabId !== FOLDER_GAP_ID &&
-      row.getBoundingClientRect().top < viewport.bottom
+  const visible = candidates.filter(
+    (tab) => tab.getBoundingClientRect().top < viewport.bottom
   )
   const last = visible.at(-1)
   return last

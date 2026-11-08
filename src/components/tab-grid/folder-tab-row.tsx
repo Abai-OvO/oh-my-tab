@@ -26,7 +26,12 @@ export default function FolderTabRow({
   entrance?: boolean
   preview?: boolean
 }) {
-  const item: TabItem = { ...tab, kind: "tab", size: "small", color }
+  const item: TabItem = {
+    ...tab,
+    kind: "tab",
+    size: tab.size ?? "small",
+    color,
+  }
   return (
     <div className="pointer-events-auto relative isolate h-full min-w-0 shrink-0">
       <TabSurface>

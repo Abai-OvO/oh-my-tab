@@ -76,25 +76,34 @@ function projectFrame(value: Frame, from: Frame, to: Frame): Frame {
 }
 
 function collectionFrames(source: HTMLElement | null) {
+  const viewport = source?.querySelector<HTMLElement>("[data-folder-surface]")
+  const bounds = viewport
+    ? viewport.getBoundingClientRect()
+    : (source?.getBoundingClientRect() ?? null)
   return new Map(
-    Array.from(
-      source?.querySelectorAll<HTMLElement>("[data-stack-row]") ?? []
-    ).map((row) => {
-      const opacity = Number.parseFloat(row.style.opacity || "1")
-      const shade = Number.parseFloat(
-        row.style.getPropertyValue("--stack-shade") || "0"
-      )
-      const zIndex = Number.parseInt(row.style.zIndex || "0", 10)
-      return [
-        row.dataset.tabId,
-        {
-          ...frame(row),
-          opacity: Number.isFinite(opacity) ? opacity : 1,
-          shade: Number.isFinite(shade) ? shade : 0,
-          zIndex: Number.isFinite(zIndex) ? zIndex : 0,
-        },
-      ] as const
-    })
+    Array.from(source?.querySelectorAll<HTMLElement>("[data-tab-id]") ?? [])
+      .filter((tab) => {
+        if (!tab.dataset.tabId || tab.closest("[inert]")) return false
+        if (!bounds) return true
+        const rect = tab.getBoundingClientRect()
+        return rect.bottom > bounds.top && rect.top < bounds.bottom
+      })
+      .map((tab) => {
+        const opacity = Number.parseFloat(tab.style.opacity || "1")
+        const shade = Number.parseFloat(
+          tab.style.getPropertyValue("--stack-shade") || "0"
+        )
+        const zIndex = Number.parseInt(tab.style.zIndex || "0", 10)
+        return [
+          tab.dataset.tabId,
+          {
+            ...frame(tab),
+            opacity: Number.isFinite(opacity) ? opacity : 1,
+            shade: Number.isFinite(shade) ? shade : 0,
+            zIndex: Number.isFinite(zIndex) ? zIndex : 0,
+          },
+        ] as const
+      })
   )
 }
 

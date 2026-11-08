@@ -433,6 +433,7 @@ export function useGridDrag({
         publish({
           kind: "folder",
           folderId: best.folderId,
+          index: folderInsertionIndex(items, best.folderId, point, session),
           ready,
           progress,
           releaseProgress: currentRelease(),

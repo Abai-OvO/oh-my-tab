@@ -3,6 +3,7 @@ import gsap from "gsap"
 import { useStackScroll } from "./collection/use-stack-scroll"
 import DraggableFolderTab from "./draggable-folder-tab"
 import FolderTabRow from "./folder-tab-row"
+import { packFolderRows, tabRowUnits } from "./tab-size"
 import type { FolderItem, TabEntry } from "@/lib/grid/types"
 import { useHomeSettingsStore } from "@/stores/home-settings-store"
 import { useTranslation } from "react-i18next"
@@ -62,6 +63,8 @@ export default function FolderTabStack({
   const { t } = useTranslation()
   const glass = backgroundType !== "solid"
   const visibleTabs = tabs ?? folder.tabs
+  const tabIds = visibleTabs.map((tab) => tab.id).join("\u0000")
+  const tabIndexes = new Map(visibleTabs.map((tab, index) => [tab.id, index]))
   const wide =
     surface === "preview" &&
     (folder.size === "wide" || folder.size === "wide-tall")
@@ -71,32 +74,41 @@ export default function FolderTabStack({
   const [stackInset, setStackInset] = useState(0)
   const rowStep = rowHeight + stackGap
   const viewportRef = useRef<HTMLDivElement>(null)
-  const previousRows = useRef<Map<string, number>>(new Map())
+  const previousTabs = useRef<Map<string, { x: number; y: number }>>(new Map())
   useLayoutEffect(() => {
     const viewport = viewportRef.current
-    if (!viewport) return
-    const rows = Array.from(
-      viewport.querySelectorAll<HTMLElement>("[data-stack-row]")
+    const list = viewport?.querySelector<HTMLElement>("[data-folder-list]")
+    if (!viewport || !list) return
+    const base = list.getBoundingClientRect()
+    const nodes = Array.from(
+      viewport.querySelectorAll<HTMLElement>("[data-tab-id]")
     )
     const next = new Map(
-      rows.map((row) => [row.dataset.tabId ?? "", row.offsetTop] as const)
+      nodes.map((node) => {
+        const rect = node.getBoundingClientRect()
+        return [
+          node.dataset.tabId ?? "",
+          { x: rect.left - base.left, y: rect.top - base.top },
+        ] as const
+      })
     )
-    const previous = previousRows.current
-    previousRows.current = next
+    const previous = previousTabs.current
+    previousTabs.current = next
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    rows.forEach((row) => {
-      const before = previous.get(row.dataset.tabId ?? "")
-      const after = next.get(row.dataset.tabId ?? "")
-      if (before === undefined || after === undefined) return
-      const delta = before - after
-      if (!delta) return
+    nodes.forEach((node) => {
+      const before = previous.get(node.dataset.tabId ?? "")
+      const after = next.get(node.dataset.tabId ?? "")
+      if (!before || !after) return
+      const dx = before.x - after.x
+      const dy = before.y - after.y
+      if (!dx && !dy) return
       gsap.fromTo(
-        row,
-        { y: delta },
-        { y: 0, duration: 0.22, ease: "power2.out", overwrite: true }
+        node,
+        { x: dx, y: dy },
+        { x: 0, y: 0, duration: 0.22, ease: "power2.out", overwrite: true }
       )
     })
-  }, [visibleTabs])
+  }, [tabIds])
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current
@@ -140,8 +152,12 @@ export default function FolderTabStack({
     topBleed,
     rowStep,
     rowHeight,
-    innerColumns,
+    // Rows are already packed into visual lines by packFolderRows.
+    innerColumns: 1,
   })
+
+  const lineUnits = innerColumns * 4
+  const lines = packFolderRows(visibleTabs, lineUnits)
 
   return (
     <div
@@ -169,12 +185,11 @@ export default function FolderTabStack({
         event.stopPropagation()
         const viewport = event.currentTarget
         const visibleHeight = viewport.clientHeight - topBleed
-        const lines = Math.ceil(visibleTabs.length / innerColumns)
         const visibleLines = Math.max(
           1,
           Math.floor((visibleHeight - rowHeight) / rowStep + 1e-6) + 1
         )
-        const maxScroll = Math.max(0, (lines - visibleLines) * rowStep)
+        const maxScroll = Math.max(0, (lines.length - visibleLines) * rowStep)
         if (maxScroll <= 0) return
         const top =
           event.key === "Home"
@@ -193,55 +208,71 @@ export default function FolderTabStack({
     >
       <div
         role="list"
+        data-folder-list
         className="relative grid"
         style={{
-          gridTemplateColumns: `repeat(${innerColumns}, minmax(0, 1fr))`,
-          columnGap: ROW_GAP,
           marginTop: stackInset,
           paddingBottom: "var(--stack-bottom, 0px)",
         }}
       >
-        {visibleTabs.map((tab, index) => (
+        {lines.map((line, lineIndex) => (
           <div
-            key={tab.id}
+            key={line.map((tab) => tab.id).join("\u0000")}
             data-stack-row
-            data-tab-id={tab.id}
-            role="listitem"
-            className={`relative after:pointer-events-none after:absolute after:inset-0 after:z-20 after:rounded-[inherit] after:opacity-[var(--stack-shade,0)] ${
-              tab.id === "__folder-gap__" ||
-              appearance.backgroundMode !== "default"
-                ? ""
-                : glass
-                  ? "after:bg-card/55"
-                  : "after:bg-card"
-            }`}
+            role="presentation"
+            className="relative grid"
             style={{
-              borderRadius: appearance.radius,
+              gridTemplateColumns: `repeat(${lineUnits}, minmax(0, 1fr))`,
+              columnGap: ROW_GAP,
               height: rowHeight,
-              marginBottom: index < visibleTabs.length - 1 ? stackGap : 0,
+              marginBottom: lineIndex < lines.length - 1 ? stackGap : 0,
             }}
           >
-            {tab.id === "__folder-gap__" ? null : draggable ? (
-              <DraggableFolderTab
-                tab={tab}
-                color={folder.color}
-                folderId={folder.id}
-                index={index}
-                rowPitch={rowStep}
-                animated={!!folder.dynamicEffect}
-                surface={surface}
-              />
-            ) : (
-              <FolderTabRow
-                tab={tab}
-                color={folder.color}
-                folderId={folder.id}
-                index={index}
-                rowPitch={rowStep}
-                animated={!!folder.dynamicEffect}
-                preview={!draggable}
-              />
-            )}
+            {line.map((tab) => {
+              const gap = tab.id === "__folder-gap__"
+              const index = tabIndexes.get(tab.id) ?? 0
+              return (
+                <div
+                  key={tab.id}
+                  data-tab-id={tab.id}
+                  role="listitem"
+                  className={`relative min-w-0 after:pointer-events-none after:absolute after:inset-0 after:z-20 after:rounded-[inherit] after:opacity-[var(--stack-shade,0)] ${
+                    tab.id === "__folder-gap__" ||
+                    appearance.backgroundMode !== "default"
+                      ? ""
+                      : glass
+                        ? "after:bg-card/55"
+                        : "after:bg-card"
+                  }`}
+                  style={{
+                    borderRadius: appearance.radius,
+                    gridColumn: `span ${tabRowUnits(tab.size)}`,
+                  }}
+                >
+                  {gap ? null : draggable ? (
+                    <DraggableFolderTab
+                      tab={tab}
+                      color={folder.color}
+                      folderId={folder.id}
+                      index={index}
+                      rowPitch={rowStep}
+                      animated={!!folder.dynamicEffect}
+                      surface={surface}
+                    />
+                  ) : (
+                    <FolderTabRow
+                      tab={tab}
+                      color={folder.color}
+                      folderId={folder.id}
+                      index={index}
+                      rowPitch={rowStep}
+                      animated={!!folder.dynamicEffect}
+                      preview={!draggable}
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
         ))}
       </div>

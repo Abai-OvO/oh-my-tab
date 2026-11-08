@@ -521,7 +521,18 @@ export default function CalendarPopup({
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent className="calendar-popup-dialog">
+      <DialogContent
+        className="calendar-popup-dialog"
+        onPointerDown={(event) => {
+          // Same as the translate panel: synthetic pointer and mouse events
+          // from this portal bubble through the React tree and would arm the
+          // drag charge of the calendar tile underneath. Swallow both.
+          event.stopPropagation()
+        }}
+        onMouseDown={(event) => {
+          event.stopPropagation()
+        }}
+      >
         <div
           className="calendar-popup"
           style={{ "--calendar-accent": item.color } as CSSProperties}

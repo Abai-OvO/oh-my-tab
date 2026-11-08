@@ -799,6 +799,15 @@ export default function WeatherPopup({
         showCloseButton={false}
         overlayClassName="bg-black/20 backdrop-blur-xl"
         className="weather-popup-dialog"
+        onPointerDown={(event) => {
+          // Same as the translate panel: synthetic pointer and mouse events
+          // from this portal bubble through the React tree and would arm the
+          // drag charge of the weather tile underneath. Swallow both.
+          event.stopPropagation()
+        }}
+        onMouseDown={(event) => {
+          event.stopPropagation()
+        }}
       >
         <DialogTitle className="sr-only">
           {t("widgets.detailTitle")}

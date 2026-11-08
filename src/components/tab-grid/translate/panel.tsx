@@ -490,8 +490,11 @@ export default function TranslatePanel({
         style={{ maxWidth: "min(880px, calc(100vw - 2rem))" }}
         onPointerDown={(event) => {
           // The panel is a React portal over a draggable grid item: synthetic
-          // pointer events bubble through the component tree and would arm the
-          // tile's drag charge underneath. Swallow them at the panel root.
+          // pointer and mouse events bubble through the component tree and
+          // would arm the tile's drag underneath. Swallow both at the root.
+          event.stopPropagation()
+        }}
+        onMouseDown={(event) => {
           event.stopPropagation()
         }}
       >

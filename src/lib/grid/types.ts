@@ -2,12 +2,7 @@ import type { SystemActionId } from "@/lib/system-actions"
 import type { UtilityWidgetItem } from "./utility-types"
 
 export type SquareTabSize = "square-small" | "square-medium" | "square-large"
-export type TabSize =
-  | "small"
-  | "medium"
-  | "icon"
-  | "compact"
-  | SquareTabSize
+export type TabSize = "small" | "medium" | "compact" | SquareTabSize
 
 export function isSquareTabSize(size: unknown): size is SquareTabSize {
   return (

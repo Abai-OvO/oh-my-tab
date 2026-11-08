@@ -188,7 +188,6 @@ export const componentRegistry = defineComponents({
     defaultColor: "#6c8bd4",
     defaultSize: "small",
     sizes: [
-      gridSize("icon", "1x1", "icon"),
       gridSize("compact", "2x1", "compact"),
       gridSize("small", "4x1", "small"),
       gridSize("medium", "4x2", "medium"),

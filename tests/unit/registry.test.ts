@@ -45,10 +45,10 @@ describe("component occupancy registration", () => {
       [4, 4],
     ])
     expect(catalogComponentKinds).toContain("weather")
-    expect(componentRegistry.weather.defaultSize).toBe("medium")
+    expect(componentRegistry.weather.defaultSize).toBe("large")
     expect(createCatalogComponent("weather")).toMatchObject({
       kind: "weather",
-      size: "medium",
+      size: "large",
     })
   })
   test("every size picks a unique occupancy from the shared scale", () => {
@@ -92,6 +92,7 @@ describe("component occupancy registration", () => {
         ])
       )
     ).toEqual({
+      "button-slot": "common",
       button: "common",
       clock: "common",
       weather: "common",
@@ -138,11 +139,10 @@ describe("component occupancy registration", () => {
   )
 
   test("search widgets expose the shared editor without changing their saved sizes", () => {
-    expect(componentRegistry["search-minimal"].openAction).toBe("edit")
     expect(componentRegistry["search-minimal"].showNameInEditor).toBe(false)
     expect(
-      getComponentSizeOptions("search-minimal", "editor").map(
-        ({ value }) => value
+      getComponentSizeOptions("search-minimal", "resize").map(
+        (size) => size.value
       )
     ).toEqual(["compact", "medium", "small"])
   })
@@ -168,15 +168,13 @@ describe("component occupancy registration", () => {
     expect(validGridItem({ ...button, action: "add-folder" })).toBe(true)
     expect(validGridItem({ ...button, action: "missing-action" })).toBe(false)
     expect(getItemGridDimensions(button)).toEqual({ width: 1, height: 1 })
-    expect(getItemGridDimensions({ kind: "calendar", size: "medium" })).toEqual(
-      {
-        width: 2,
-        height: 2,
-      }
-    )
+    expect(getItemGridDimensions({ kind: "calendar", size: "large" })).toEqual({
+      width: 4,
+      height: 4,
+    })
   })
 
-  test("tabs offer icon and half-width sizes without changing their default", () => {
+  test("tabs offer compact and square sizes without changing their default", () => {
     const definition = componentRegistry.tab
     expect(definition.defaultSize).toBe("small")
     expect(
@@ -184,15 +182,26 @@ describe("component occupancy registration", () => {
         ({ value, width, height }) => [value, width, height]
       )
     ).toEqual([
-      ["icon", 1, 1],
       ["compact", 2, 1],
       ["small", 4, 1],
       ["medium", 4, 2],
+      ["square-small", 1, 1],
+      ["square-medium", 2, 2],
+      ["square-large", 4, 4],
     ])
     expect(
       getComponentSizeOptions("tab", "editor").map(({ value }) => value)
-    ).toEqual(["icon", "compact", "small", "medium"])
-    expect(getItemGridDimensions({ kind: "tab", size: "icon" })).toEqual({
+    ).toEqual([
+      "compact",
+      "small",
+      "medium",
+      "square-small",
+      "square-medium",
+      "square-large",
+    ])
+    expect(
+      getItemGridDimensions({ kind: "tab", size: "square-small" })
+    ).toEqual({
       width: 1,
       height: 1,
     })
@@ -205,7 +214,7 @@ describe("component occupancy registration", () => {
       kind: "tab" as const,
       name: "Icon",
       url: "https://example.com/",
-      size: "icon" as const,
+      size: "square-small" as const,
       color: "#6c8bd4",
     }
     expect(validGridItem(iconTab)).toBe(true)

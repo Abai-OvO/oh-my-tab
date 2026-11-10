@@ -84,6 +84,7 @@ function WeatherGlyph({
   const Icon = {
     clear: Sun,
     cloudy: CloudSun,
+    haze: CloudFog,
     fog: CloudFog,
     thunder: CloudLightning,
     snow: CloudSnow,

@@ -295,6 +295,8 @@ function iconCode(value: unknown): number | null {
   if (icon >= 300 && icon < 400) return 61
   if (icon >= 400 && icon < 500) return 71
   if (icon >= 200 && icon < 300) return 45
+  // Haze (霾) and dust (扬沙/浮尘/沙尘暴) share the haze sentinel; fog stays 45.
+  if ([501, 502, 503, 504, 507, 508, 511, 512, 513].includes(icon)) return 40
   if (icon >= 500 && icon < 600) return 45
   return null
 }

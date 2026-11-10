@@ -27,6 +27,7 @@ export type UtilityWidgetSize =
 export type CountdownEvent = { title: string; date: string }
 export type WorldClockZone = { id: string; label: string; timeZone: string }
 export type WeatherProvider = "open-meteo" | "qweather"
+export type WeatherSkin = "minimal" | "pixel"
 
 type UtilityBase = {
   id: string
@@ -64,6 +65,7 @@ export type UtilityWidgetItem = UtilityBase &
         latitude: number | null
         longitude: number | null
         unit: "celsius" | "fahrenheit"
+        skin?: WeatherSkin
       }
     | {
         kind: "photo"

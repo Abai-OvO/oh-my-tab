@@ -1081,6 +1081,29 @@ export default function UtilityWidgetFields({
                 })
               }
             />
+            <fieldset className="utility-editor-group">
+              <legend>{t("widgets.weatherSkin")}</legend>
+              <ToggleGroup
+                className="utility-editor-segmented"
+                aria-label={t("widgets.weatherSkin")}
+                value={[draft.skin ?? "minimal"]}
+                onValueChange={(values) => {
+                  const value = values[0]
+                  if (value === "minimal" || value === "pixel")
+                    patch({ skin: value })
+                }}
+              >
+                <ToggleGroupItem value="minimal">
+                  {t("widgets.skinMinimal")}
+                </ToggleGroupItem>
+                <ToggleGroupItem value="pixel">
+                  {t("widgets.skinPixel")}
+                </ToggleGroupItem>
+              </ToggleGroup>
+              <p className="utility-editor-help">
+                {t("widgets.weatherSkinHelp")}
+              </p>
+            </fieldset>
             <p className="utility-editor-help">
               {weatherProvider === "qweather"
                 ? t("widgets.weatherPrivacy")

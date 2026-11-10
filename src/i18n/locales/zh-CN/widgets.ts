@@ -220,6 +220,10 @@ export default {
   qweatherConsole: "打开和风天气控制台",
   qweatherLegacyHost: "使用旧版公共 Host（devapi.qweather.com）",
   temperatureUnit: "温度单位",
+  weatherSkin: "卡面风格",
+  skinMinimal: "简约",
+  skinPixel: "像素",
+  weatherSkinHelp: "像素风格为磁贴提供复古像素天空与扫描线，仅影响磁贴外观。",
   selectedLocation: "所选地点",
   forecast: "未来几天预报",
   tomorrow: "明天",
@@ -242,6 +246,7 @@ export default {
   conditions: {
     clear: "晴",
     cloudy: "多云",
+    haze: "霾",
     fog: "雾",
     thunder: "雷雨",
     snow: "雪",

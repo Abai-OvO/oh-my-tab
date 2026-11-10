@@ -259,6 +259,9 @@ export function validUtilityWidget(item: UtilityWidgetItem): boolean {
         (item.provider === undefined ||
           item.provider === "open-meteo" ||
           item.provider === "qweather") &&
+        (item.skin === undefined ||
+          item.skin === "minimal" ||
+          item.skin === "pixel") &&
         ((item.latitude === null && item.longitude === null) ||
           (typeof item.latitude === "number" &&
             Number.isFinite(item.latitude) &&
@@ -347,6 +350,7 @@ export function createUtilityWidget(
         latitude: null,
         longitude: null,
         unit: "celsius",
+        skin: "minimal",
       }
     case "photo":
       return { ...shared, kind, image: "", caption: "", fit: "cover" }

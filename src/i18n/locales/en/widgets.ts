@@ -226,6 +226,11 @@ export default {
   qweatherConsole: "Open QWeather Console",
   qweatherLegacyHost: "Use legacy public Host (devapi.qweather.com)",
   temperatureUnit: "Temperature unit",
+  weatherSkin: "Tile style",
+  skinMinimal: "Minimal",
+  skinPixel: "Pixel",
+  weatherSkinHelp:
+    "Pixel style gives the tile a retro pixel sky with scanlines; it only changes the tile appearance.",
   selectedLocation: "Selected location",
   forecast: "Multi-day forecast",
   tomorrow: "Tomorrow",
@@ -249,6 +254,7 @@ export default {
   conditions: {
     clear: "Clear",
     cloudy: "Cloudy",
+    haze: "Haze",
     fog: "Fog",
     thunder: "Thunderstorms",
     snow: "Snow",

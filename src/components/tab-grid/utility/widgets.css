@@ -1173,3 +1173,333 @@ button.utility-error {
   align-items: baseline;
   flex-direction: row;
 }
+
+/* Pixel skin for the weather tile. */
+.utility-weather.utility-weather-pixel .utility-body {
+  gap: 0;
+  padding: 0;
+}
+.utility-wpixel {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  color: #fff;
+  font-family: "Courier New", Courier, monospace;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
+}
+.utility-wpixel-clear {
+  background: linear-gradient(180deg, #58a6e8 0%, #2e78c2 100%);
+}
+.utility-wpixel-cloudy {
+  background: linear-gradient(180deg, #93a9c9 0%, #5f7ba3 100%);
+}
+.utility-wpixel-haze {
+  background: linear-gradient(180deg, #a8a08e 0%, #7d7668 100%);
+}
+.utility-wpixel-fog {
+  background: linear-gradient(180deg, #a9b4bd 0%, #78858f 100%);
+}
+.utility-wpixel-rain {
+  background: linear-gradient(180deg, #6e87ad 0%, #48628a 100%);
+}
+.utility-wpixel-snow {
+  background: linear-gradient(180deg, #9db8d8 0%, #6e93c4 100%);
+}
+.utility-wpixel-thunder {
+  background: linear-gradient(180deg, #5a6b8c 0%, #37476b 100%);
+}
+.utility-wpixel-unknown {
+  background: linear-gradient(180deg, #8fa0b4 0%, #5c6f85 100%);
+}
+.utility-wpixel-landscape {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 30%;
+  shape-rendering: crispEdges;
+  z-index: 1;
+}
+.utility-wpixel-sky-glyph {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: clamp(36px, 20cqw, 64px);
+  height: auto;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.12));
+  z-index: 2;
+}
+.utility-wpixel-decor-a {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 36px;
+  z-index: 1;
+  opacity: 0.8;
+}
+.utility-wpixel-decor-b {
+  position: absolute;
+  top: 38%;
+  right: 30%;
+  width: 16px;
+  z-index: 1;
+  opacity: 0.9;
+}
+.utility-wpixel-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 3px;
+  padding: 12px 14px;
+}
+.utility-wpixel-temp-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+.utility-wpixel-location {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.utility-wpixel-temp {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.05;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.1));
+}
+.utility-wpixel-temp span {
+  opacity: 0.8;
+}
+.utility-wpixel-condition {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.utility-wpixel-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.utility-wpixel-chip {
+  padding: 3px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.utility-wpixel-strip {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 3px;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+.utility-wpixel-col {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  opacity: 0.85;
+}
+.utility-wpixel-col:first-child {
+  opacity: 1;
+}
+.utility-wpixel-day {
+  font-size: 9px;
+  font-weight: 700;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.utility-wpixel-day-glyph {
+  width: 16px;
+  height: 16px;
+}
+.utility-wpixel-temps {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.utility-wpixel-list {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 6px;
+  padding: 8px 14px 10px;
+  background: rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+.utility-wpixel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.utility-wpixel-row .utility-wpixel-day {
+  flex: 0 0 34px;
+  font-size: 10px;
+}
+.utility-wpixel-row .utility-wpixel-day-glyph {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+.utility-wpixel-bar {
+  flex: 1;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.35), #fff);
+}
+.utility-wpixel-row .utility-wpixel-temps {
+  font-size: 11px;
+}
+.utility-wpixel-scanlines {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(0, 0, 0, 0.04) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Size-specific tuning for the pixel skin. */
+.utility-surface[data-size="small"] .utility-wpixel-sky-glyph {
+  top: 50%;
+  right: 12px;
+  width: 42px;
+  transform: translateY(-50%);
+}
+.utility-surface[data-size="small"] .utility-wpixel-content {
+  justify-content: space-between;
+  gap: 0;
+  padding: 10px 12px;
+}
+.utility-surface[data-size="small"] .utility-wpixel-temp {
+  font-size: 26px;
+}
+.utility-surface[data-size="small"] .utility-wpixel-condition {
+  max-width: 9em;
+}
+.utility-surface[data-size="narrow"] .utility-wpixel-landscape {
+  height: 22%;
+}
+.utility-surface[data-size="narrow"] .utility-wpixel-sky-glyph {
+  position: static;
+  margin: 8px auto 0;
+  width: 36px;
+  transform: none;
+  filter: none;
+}
+.utility-surface[data-size="narrow"] .utility-wpixel-content {
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  padding: 12px 8px;
+}
+.utility-surface[data-size="narrow"] .utility-wpixel-temp-row {
+  justify-content: center;
+  max-width: none;
+}
+.utility-surface[data-size="narrow"] .utility-wpixel-temp {
+  font-size: 22px;
+}
+.utility-surface[data-size="narrow"] .utility-wpixel-location {
+  letter-spacing: 0.5px;
+}
+.utility-surface[data-size="square"] .utility-wpixel-temp {
+  font-size: 32px;
+}
+.utility-surface[data-size="square"] .utility-wpixel-sky-glyph {
+  top: 12px;
+  right: 12px;
+  width: 46px;
+}
+.utility-surface[data-size="medium"] .utility-wpixel-temp {
+  font-size: 32px;
+}
+.utility-surface[data-size="medium"] .utility-wpixel-content {
+  gap: 3px;
+  padding: 8px 14px 10px;
+}
+.utility-surface[data-size="tall"] .utility-wpixel-content {
+  justify-content: flex-start;
+  padding-top: 14px;
+}
+.utility-surface[data-size="tall"] .utility-wpixel-row {
+  gap: 6px;
+}
+.utility-surface[data-size="tall"] .utility-wpixel-row .utility-wpixel-day {
+  flex: 0 0 26px;
+  font-size: 10px;
+}
+.utility-surface[data-size="tall"]
+  .utility-wpixel-row
+  .utility-wpixel-day-glyph {
+  flex: 0 0 16px;
+}
+.utility-surface[data-size="tall"] .utility-wpixel-row .utility-wpixel-temps {
+  font-size: 10px;
+}
+.utility-surface[data-size="tall"] .utility-wpixel-sky-glyph {
+  width: 48px;
+}
+.utility-surface[data-size="large"] .utility-wpixel-content {
+  gap: 6px;
+}
+.utility-surface[data-size="large"] .utility-wpixel-temp {
+  font-size: 44px;
+}
+.utility-surface[data-size="large"] .utility-wpixel-sky-glyph {
+  top: 16px;
+  right: 18px;
+  width: clamp(64px, 24cqw, 96px);
+}
+.utility-surface[data-size="large"] .utility-wpixel-decor-a {
+  width: 56px;
+  top: 16px;
+  left: 18px;
+}
+.utility-surface[data-size="large"] .utility-wpixel-chip {
+  font-size: 11px;
+  padding: 4px 10px;
+}
+.utility-surface[data-size="large"] .utility-wpixel-day-glyph {
+  width: 18px;
+  height: 18px;
+}
+.utility-surface[data-size="large"] .utility-wpixel-temps {
+  font-size: 10px;
+}
+.utility-surface[data-size="large"] .utility-wpixel-day {
+  font-size: 10px;
+}

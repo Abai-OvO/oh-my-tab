@@ -64,6 +64,7 @@ function WeatherGlyph({
   const Icon = {
     clear: Sun,
     cloudy: CloudSun,
+    haze: CloudFog,
     fog: CloudFog,
     thunder: CloudLightning,
     snow: CloudSnow,
@@ -76,6 +77,457 @@ function WeatherGlyph({
 }
 
 const sampleCodes = [0, 1, 2, 61, 3, 71, 0]
+
+type PixelRect = [x: number, y: number, width: number, height: number]
+
+type PixelPart = {
+  fill: string
+  rects: PixelRect[]
+}
+
+/** Stepped cloud body (rows top to bottom) shared by several glyphs. */
+const PIXEL_CLOUD_BODY: PixelRect[] = [
+  [6, 3, 4, 1],
+  [5, 4, 6, 1],
+  [4, 5, 9, 1],
+  [3, 6, 11, 1],
+  [2, 7, 13, 2],
+  [3, 9, 12, 1],
+]
+
+const PIXEL_GLYPHS: Record<string, PixelPart[]> = {
+  clear: [
+    {
+      fill: "#ffdf60",
+      rects: [
+        [7, 0, 2, 2],
+        [7, 14, 2, 2],
+        [0, 7, 2, 2],
+        [14, 7, 2, 2],
+        [2, 2, 2, 2],
+        [12, 2, 2, 2],
+        [2, 12, 2, 2],
+        [12, 12, 2, 2],
+      ],
+    },
+    {
+      fill: "#ffcf40",
+      rects: [
+        [6, 4, 4, 1],
+        [5, 5, 6, 1],
+        [4, 6, 8, 4],
+        [5, 10, 6, 1],
+        [6, 11, 4, 1],
+      ],
+    },
+    {
+      fill: "#fff8e0",
+      rects: [[5, 6, 2, 2]],
+    },
+  ],
+  cloudy: [
+    {
+      fill: "#ffcf40",
+      rects: [
+        [12, 1, 3, 1],
+        [11, 2, 5, 2],
+        [12, 4, 3, 1],
+      ],
+    },
+    {
+      fill: "#fff8e0",
+      rects: [[12, 2, 1, 1]],
+    },
+    { fill: "#ffffff", rects: PIXEL_CLOUD_BODY },
+    { fill: "#e3ecf4", rects: [[4, 10, 10, 1]] },
+  ],
+  fog: [
+    { fill: "#f6f9fb", rects: PIXEL_CLOUD_BODY },
+    { fill: "#dfe8ef", rects: [[4, 10, 10, 1]] },
+    {
+      fill: "rgba(255, 255, 255, 0.85)",
+      rects: [[2, 11, 12, 1]],
+    },
+    {
+      fill: "rgba(255, 255, 255, 0.55)",
+      rects: [[4, 13, 9, 1]],
+    },
+    {
+      fill: "rgba(255, 255, 255, 0.3)",
+      rects: [[3, 15, 10, 1]],
+    },
+  ],
+  haze: [
+    {
+      fill: "rgba(255, 223, 96, 0.6)",
+      rects: [
+        [12, 1, 3, 1],
+        [11, 2, 5, 1],
+        [11, 3, 5, 1],
+        [12, 4, 3, 1],
+      ],
+    },
+    { fill: "#d8d0c0", rects: PIXEL_CLOUD_BODY },
+    { fill: "#b5ab94", rects: [[4, 10, 10, 1]] },
+    {
+      fill: "rgba(224, 208, 176, 0.85)",
+      rects: [[2, 11, 12, 1]],
+    },
+    {
+      fill: "rgba(224, 208, 176, 0.5)",
+      rects: [[4, 13, 9, 1]],
+    },
+  ],
+  thunder: [
+    { fill: "#f4f7fa", rects: PIXEL_CLOUD_BODY },
+    { fill: "#d9e3ec", rects: [[4, 10, 10, 1]] },
+    {
+      fill: "#ffdf60",
+      rects: [
+        [8, 10, 3, 2],
+        [6, 12, 3, 1],
+        [7, 13, 3, 2],
+      ],
+    },
+    {
+      fill: "#9fc9f0",
+      rects: [
+        [3, 11, 1, 2],
+        [5, 12, 1, 2],
+        [12, 11, 1, 2],
+        [10, 12, 1, 2],
+      ],
+    },
+  ],
+  snow: [
+    { fill: "#ffffff", rects: PIXEL_CLOUD_BODY },
+    { fill: "#e3ecf4", rects: [[4, 10, 10, 1]] },
+    {
+      fill: "#eaf3ff",
+      rects: [
+        [4, 11, 1, 3],
+        [3, 12, 3, 1],
+        [9, 12, 1, 3],
+        [8, 13, 3, 1],
+        [13, 11, 1, 3],
+        [12, 12, 3, 1],
+      ],
+    },
+  ],
+  rain: [
+    { fill: "#ffffff", rects: PIXEL_CLOUD_BODY },
+    { fill: "#e3ecf4", rects: [[4, 10, 10, 1]] },
+    {
+      fill: "#9fc9f0",
+      rects: [
+        [4, 11, 1, 2],
+        [7, 12, 1, 2],
+        [10, 11, 1, 2],
+        [13, 12, 1, 2],
+      ],
+    },
+  ],
+  unknown: [
+    { fill: "#ffffff", rects: PIXEL_CLOUD_BODY },
+    { fill: "#e3ecf4", rects: [[4, 10, 10, 1]] },
+  ],
+}
+
+const PIXEL_DECOR_CLOUD: PixelRect[] = [
+  [1, 0, 3, 1],
+  [0, 1, 5, 1],
+  [1, 2, 3, 1],
+]
+
+const PIXEL_DECOR_SPARK: PixelRect[] = [
+  [0, 0, 1, 1],
+  [2, 1, 1, 1],
+  [1, 2, 1, 1],
+]
+
+const PIXEL_LANDSCAPE: PixelRect[] = [
+  [0, 6, 10, 6],
+  [10, 3, 8, 9],
+  [18, 7, 12, 5],
+  [30, 4, 10, 8],
+  [40, 8, 12, 4],
+  [52, 5, 12, 7],
+]
+
+function PixelGlyph({
+  code,
+  className,
+}: {
+  code: number | null
+  className?: string
+}) {
+  const parts = PIXEL_GLYPHS[weatherCondition(code)] ?? PIXEL_GLYPHS.unknown
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={className}
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+    >
+      {parts.map((part, index) =>
+        part.rects.map((rect, rectIndex) => (
+          <rect
+            key={`${index}-${rectIndex}`}
+            x={rect[0]}
+            y={rect[1]}
+            width={rect[2]}
+            height={rect[3]}
+            fill={part.fill}
+          />
+        ))
+      )}
+    </svg>
+  )
+}
+
+function PixelDecor({
+  rects,
+  className,
+  fill,
+}: {
+  rects: PixelRect[]
+  className: string
+  fill: string
+}) {
+  return (
+    <svg
+      viewBox="0 0 5 3"
+      className={className}
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+    >
+      {rects.map((rect, index) => (
+        <rect
+          key={index}
+          x={rect[0]}
+          y={rect[1]}
+          width={rect[2]}
+          height={rect[3]}
+          fill={fill}
+        />
+      ))}
+    </svg>
+  )
+}
+
+function PixelForecastRow({
+  label,
+  code,
+  low,
+  high,
+  stacked,
+}: {
+  label: string
+  code: number | null
+  low: number
+  high: number
+  stacked?: boolean
+}) {
+  return (
+    <div className={stacked ? "utility-wpixel-row" : "utility-wpixel-col"}>
+      <span className="utility-wpixel-day">{label}</span>
+      <PixelGlyph code={code} className="utility-wpixel-day-glyph" />
+      {stacked ? (
+        <>
+          <span className="utility-wpixel-bar" aria-hidden="true" />
+          <span className="utility-wpixel-temps">
+            {Math.round(low)}° {Math.round(high)}°
+          </span>
+        </>
+      ) : (
+        <span className="utility-wpixel-temps">
+          {Math.round(low)}~{Math.round(high)}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function WeatherPixel({
+  item,
+  data,
+}: {
+  item: Extract<RemoteWidgetItem, { kind: "weather" }>
+  data: WeatherData
+}) {
+  const { t, i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? "en"
+  const today = data.forecast[0]
+  const future = data.forecast.slice(1)
+  const condition = weatherCondition(data.code)
+  const conditionLabel =
+    data.description ?? t(`widgets.conditions.${condition}`)
+  const inlineCondition = item.size === "small" || item.size === "medium"
+  const showStrip = item.size === "medium" || item.size === "large"
+  const showList = item.size === "tall"
+  const showMeta = item.size === "large"
+  const showLandscape = item.size === "narrow" || item.size === "square"
+  const shortRange =
+    item.size === "square" || item.size === "tall" || item.size === "medium"
+  const rangeLabel = today
+    ? shortRange
+      ? `${Math.round(today.low)}°~${Math.round(today.high)}°`
+      : t("widgets.lowHigh", {
+          low: Math.round(today.low),
+          high: Math.round(today.high),
+        })
+    : null
+  const strip = future.slice(0, item.size === "large" ? 6 : 5)
+  const list = future.slice(0, 4)
+  const wind = data.wind
+  const meta = showMeta
+    ? [
+        data.feelsLike !== undefined
+          ? {
+              key: "feels",
+              label: t("widgets.feelsLike", {
+                value: Math.round(data.feelsLike),
+              }),
+            }
+          : null,
+        data.humidity !== undefined
+          ? {
+              key: "humidity",
+              label: `${t("widgets.humidity")} ${Math.round(data.humidity)}%`,
+            }
+          : null,
+        wind && (wind.direction || wind.scale !== undefined)
+          ? {
+              key: "wind",
+              label: [
+                wind.direction,
+                wind.scale !== undefined
+                  ? t("widgets.windLevel", { level: wind.scale })
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" "),
+            }
+          : null,
+      ].filter((part): part is { key: string; label: string } => part !== null)
+    : []
+  return (
+    <div className={`utility-wpixel utility-wpixel-${condition}`}>
+      {showLandscape && (
+        <svg
+          className="utility-wpixel-landscape"
+          viewBox="0 0 64 12"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          {PIXEL_LANDSCAPE.map((rect, index) => (
+            <rect
+              key={index}
+              x={rect[0]}
+              y={rect[1]}
+              width={rect[2]}
+              height={rect[3]}
+              fill="rgba(0, 0, 0, 0.16)"
+            />
+          ))}
+        </svg>
+      )}
+      {item.size === "large" && (
+        <>
+          <PixelDecor
+            rects={PIXEL_DECOR_CLOUD}
+            fill="rgba(255, 255, 255, 0.5)"
+            className="utility-wpixel-decor-a"
+          />
+          {condition === "clear" && (
+            <PixelDecor
+              rects={PIXEL_DECOR_SPARK}
+              fill="rgba(255, 255, 255, 0.7)"
+              className="utility-wpixel-decor-b"
+            />
+          )}
+        </>
+      )}
+      <PixelGlyph code={data.code} className="utility-wpixel-sky-glyph" />
+      <div className="utility-wpixel-content">
+        <span className="utility-wpixel-location">
+          {item.locationName || item.name}
+        </span>
+        <div className="utility-wpixel-temp-row">
+          <strong
+            className="utility-wpixel-temp"
+            aria-label={t("widgets.currentTemperature", {
+              value: Math.round(data.temperature),
+            })}
+          >
+            {Math.round(data.temperature)}
+            <span>°</span>
+          </strong>
+          {inlineCondition && (
+            <span className="utility-wpixel-condition">
+              {rangeLabel
+                ? `${conditionLabel} · ${rangeLabel}`
+                : conditionLabel}
+            </span>
+          )}
+        </div>
+        {!inlineCondition && (
+          <span className="utility-wpixel-condition">
+            {rangeLabel ? `${conditionLabel} · ${rangeLabel}` : conditionLabel}
+          </span>
+        )}
+        {meta.length > 0 && (
+          <div className="utility-wpixel-meta">
+            {meta.map((part) => (
+              <span className="utility-wpixel-chip" key={part.key}>
+                {part.label}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      {showStrip && (
+        <div
+          className="utility-wpixel-strip"
+          aria-label={t("widgets.forecast")}
+        >
+          {strip.map((day, index) => (
+            <PixelForecastRow
+              key={day.date}
+              label={
+                index === 0
+                  ? t("widgets.tomorrow")
+                  : calendarLabel(day.date, locale, true)
+              }
+              code={day.code}
+              low={day.low}
+              high={day.high}
+            />
+          ))}
+        </div>
+      )}
+      {showList && (
+        <div className="utility-wpixel-list" aria-label={t("widgets.forecast")}>
+          {list.map((day, index) => (
+            <PixelForecastRow
+              key={day.date}
+              stacked
+              label={
+                index === 0
+                  ? t("widgets.tomorrow")
+                  : calendarLabel(day.date, locale, true)
+              }
+              code={day.code}
+              low={day.low}
+              high={day.high}
+            />
+          ))}
+        </div>
+      )}
+      <div className="utility-wpixel-scanlines" aria-hidden="true" />
+    </div>
+  )
+}
 
 function sampleWeather(fahrenheit: boolean): WeatherData {
   const highs = [24, 23, 25, 20, 22, 19, 21]
@@ -407,6 +859,15 @@ export default function RemoteTile(props: WidgetProps<RemoteWidgetItem>) {
   const isWeather = item.kind === "weather"
   const weatherNeedsSetup = isWeather && (!weatherReady || !source)
   const weatherNeedsLocation = isWeather && !hasWeatherLocation
+  const pixelSkin = isWeather && item.skin === "pixel"
+  const weatherReading =
+    isWeather && display?.kind === "weather" && item.kind === "weather" ? (
+      pixelSkin ? (
+        <WeatherPixel item={item} data={display} />
+      ) : (
+        <WeatherReading item={item} data={display} />
+      )
+    ) : null
   const footer = !isWeather && (source || sample) && (
     <>
       <span title={source?.origin}>{source?.hostname || "RSS / Atom"}</span>
@@ -445,7 +906,9 @@ export default function RemoteTile(props: WidgetProps<RemoteWidgetItem>) {
     <>
       <WidgetSurface
         {...props}
-        className={`utility-remote utility-${item.kind}`}
+        className={`utility-remote utility-${item.kind}${
+          pixelSkin ? "utility-weather-pixel" : ""
+        }`}
         title={
           item.kind === "weather" ? item.locationName || item.name : item.name
         }
@@ -515,7 +978,7 @@ export default function RemoteTile(props: WidgetProps<RemoteWidgetItem>) {
               display?.kind === "weather" &&
               item.kind === "weather" &&
               (preview || sample ? (
-                <WeatherReading item={item} data={display} />
+                weatherReading
               ) : (
                 <div
                   className="utility-weather-open utility-focus"
@@ -558,7 +1021,7 @@ export default function RemoteTile(props: WidgetProps<RemoteWidgetItem>) {
                     }
                   }}
                 >
-                  <WeatherReading item={item} data={display} />
+                  {weatherReading}
                 </div>
               ))}
             {!error && display?.kind === "rss" && (

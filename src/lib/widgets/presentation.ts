@@ -92,6 +92,8 @@ export function sourceHost(value: string) {
 export function weatherCondition(code: number | null) {
   if (code === 0) return "clear"
   if (code !== null && code >= 1 && code <= 3) return "cloudy"
+  // 40 is a QWeather-only sentinel for haze and dust (Open-Meteo has none).
+  if (code === 40) return "haze"
   if (code === 45 || code === 48) return "fog"
   if (code !== null && code >= 95) return "thunder"
   if (

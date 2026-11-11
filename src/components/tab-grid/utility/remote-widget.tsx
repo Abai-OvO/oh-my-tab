@@ -332,18 +332,9 @@ function PixelForecastRow({
     <div className={stacked ? "utility-wpixel-row" : "utility-wpixel-col"}>
       <span className="utility-wpixel-day">{label}</span>
       <PixelGlyph code={code} className="utility-wpixel-day-glyph" />
-      {stacked ? (
-        <>
-          <span className="utility-wpixel-bar" aria-hidden="true" />
-          <span className="utility-wpixel-temps">
-            {Math.round(low)}° {Math.round(high)}°
-          </span>
-        </>
-      ) : (
-        <span className="utility-wpixel-temps">
-          {Math.round(low)}~{Math.round(high)}
-        </span>
-      )}
+      <span className="utility-wpixel-temps">
+        {Math.round(low)}/{Math.round(high)}
+      </span>
     </div>
   )
 }
@@ -362,16 +353,19 @@ function WeatherPixel({
   const condition = weatherCondition(data.code)
   const conditionLabel =
     data.description ?? t(`widgets.conditions.${condition}`)
-  const inlineCondition = item.size === "small" || item.size === "medium"
+  const compact = item.size === "small"
+  const inlineCondition = item.size === "medium"
   const showStrip = item.size === "medium" || item.size === "large"
   const showList = item.size === "tall"
   const showMeta = item.size === "large"
   const showLandscape = item.size === "narrow" || item.size === "square"
+  /** Square and tall always split condition and range into two even lines. */
+  const stackedRange = item.size === "square" || item.size === "tall"
   const shortRange =
     item.size === "square" || item.size === "tall" || item.size === "medium"
   const rangeLabel = today
     ? shortRange
-      ? `${Math.round(today.low)}°~${Math.round(today.high)}°`
+      ? `${Math.round(today.low)}°/${Math.round(today.high)}°`
       : t("widgets.lowHigh", {
           low: Math.round(today.low),
           high: Math.round(today.high),
@@ -448,7 +442,9 @@ function WeatherPixel({
           )}
         </>
       )}
-      <PixelGlyph code={data.code} className="utility-wpixel-sky-glyph" />
+      {!compact && (
+        <PixelGlyph code={data.code} className="utility-wpixel-sky-glyph" />
+      )}
       <div className="utility-wpixel-content">
         <span className="utility-wpixel-location">
           {item.locationName || item.name}
@@ -463,6 +459,15 @@ function WeatherPixel({
             {Math.round(data.temperature)}
             <span>°</span>
           </strong>
+          {compact && (
+            <span className="utility-wpixel-condition">{conditionLabel}</span>
+          )}
+          {compact && (
+            <PixelGlyph
+              code={data.code}
+              className="utility-wpixel-inline-glyph"
+            />
+          )}
           {inlineCondition && (
             <span className="utility-wpixel-condition">
               {rangeLabel
@@ -473,7 +478,16 @@ function WeatherPixel({
         </div>
         {!inlineCondition && (
           <span className="utility-wpixel-condition">
-            {rangeLabel ? `${conditionLabel} · ${rangeLabel}` : conditionLabel}
+            {stackedRange && rangeLabel ? (
+              <>
+                <span>{conditionLabel}</span>
+                <span>{rangeLabel}</span>
+              </>
+            ) : rangeLabel ? (
+              `${conditionLabel} · ${rangeLabel}`
+            ) : (
+              conditionLabel
+            )}
           </span>
         )}
         {meta.length > 0 && (

@@ -1258,6 +1258,13 @@ button.utility-error {
   gap: 3px;
   padding: 12px 14px;
 }
+.utility-wpixel-content > * {
+  flex-shrink: 0;
+}
+.utility-wpixel-strip,
+.utility-wpixel-list {
+  flex-shrink: 0;
+}
 .utility-wpixel-temp-row {
   display: flex;
   align-items: baseline;
@@ -1371,11 +1378,6 @@ button.utility-error {
   height: 16px;
   flex: 0 0 16px;
 }
-.utility-wpixel-bar {
-  flex: 1;
-  height: 4px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.35), #fff);
-}
 .utility-wpixel-row .utility-wpixel-temps {
   font-size: 11px;
 }
@@ -1393,22 +1395,26 @@ button.utility-error {
 }
 
 /* Size-specific tuning for the pixel skin. */
-.utility-surface[data-size="small"] .utility-wpixel-sky-glyph {
-  top: 50%;
-  right: 12px;
-  width: 42px;
-  transform: translateY(-50%);
+.utility-wpixel-inline-glyph {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.12));
 }
 .utility-surface[data-size="small"] .utility-wpixel-content {
   justify-content: space-between;
   gap: 0;
-  padding: 10px 12px;
+  padding: 8px 12px;
+}
+.utility-surface[data-size="small"] .utility-wpixel-temp-row {
+  justify-content: flex-start;
+  gap: 6px;
+}
+.utility-surface[data-size="small"] .utility-wpixel-inline-glyph {
+  margin-left: auto;
 }
 .utility-surface[data-size="small"] .utility-wpixel-temp {
-  font-size: 26px;
-}
-.utility-surface[data-size="small"] .utility-wpixel-condition {
-  max-width: 9em;
+  font-size: 22px;
 }
 .utility-surface[data-size="narrow"] .utility-wpixel-landscape {
   height: 22%;
@@ -1444,16 +1450,25 @@ button.utility-error {
   right: 12px;
   width: 46px;
 }
+.utility-wpixel-condition > span {
+  display: block;
+}
+.utility-surface[data-size="square"] .utility-wpixel-condition,
+.utility-surface[data-size="tall"] .utility-wpixel-condition {
+  white-space: normal;
+  line-height: 1.4;
+}
 .utility-surface[data-size="medium"] .utility-wpixel-temp {
   font-size: 32px;
 }
 .utility-surface[data-size="medium"] .utility-wpixel-content {
-  gap: 3px;
-  padding: 8px 14px 10px;
+  gap: 4px;
+  padding: 10px 14px 14px;
 }
 .utility-surface[data-size="tall"] .utility-wpixel-content {
   justify-content: flex-start;
-  padding-top: 14px;
+  gap: 6px;
+  padding-top: 16px;
 }
 .utility-surface[data-size="tall"] .utility-wpixel-row {
   gap: 6px;
@@ -1468,6 +1483,7 @@ button.utility-error {
   flex: 0 0 16px;
 }
 .utility-surface[data-size="tall"] .utility-wpixel-row .utility-wpixel-temps {
+  margin-left: auto;
   font-size: 10px;
 }
 .utility-surface[data-size="tall"] .utility-wpixel-sky-glyph {
